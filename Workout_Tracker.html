@@ -604,13 +604,13 @@
     { name: "Warm-up A", exerciseNames: ["Treadmill Jog", "Band Pull-Aparts"] },
     { name: "Warm-up B", exerciseNames: ["Bodyweight Squats", "Cat-Cow Stretch"] },
     { name: "Warm-up C", exerciseNames: ["Treadmill Jog", "Cat-Cow Stretch"] },
-    { name: "Push A", exerciseNames: ["Chest Press (Multi Press)", "Incline DB Press", "Cable Shoulder Press", "Cable Lateral Raise", "Cable Triceps Pushdown"] },
-    { name: "Pull A", exerciseNames: ["Lat Pulldown", "Vertical Row", "Cable Row", "One-Arm DB Row", "Cable / DB Curl"] },
-    { name: "Legs A", exerciseNames: ["Leg Press", "Leg Extension", "Leg Curl", "Calf Raise", "Walking Lunge"] },
-    { name: "Cardio + Core", exerciseNames: ["Treadmill Walk", "Medicine Ball Russian Twist", "Medicine Ball Slam"] },
-    { name: "Push B", exerciseNames: ["Incline DB Press", "Chest Press (Multi Press)", "Cable Lateral Raise", "Cable Shoulder Press", "Cable Triceps Pushdown"] },
-    { name: "Pull B", exerciseNames: ["Vertical Row", "Cable Row", "Lat Pulldown", "Cable / DB Curl", "Cable Face Pull"] },
-    { name: "Legs B", exerciseNames: ["Leg Press", "Leg Curl", "Calf Raise", "Walking Lunge", "Medicine Ball Russian Twist"] },
+    { name: "Monday", exerciseNames: ["Chest Press (Multi Press)", "Incline DB Press", "Cable Shoulder Press", "Cable Lateral Raise", "Cable Triceps Pushdown"] },
+    { name: "Tuesday", exerciseNames: ["Lat Pulldown", "Vertical Row", "Cable Row", "One-Arm DB Row", "Cable / DB Curl"] },
+    { name: "Wednesday", exerciseNames: ["Leg Press", "Leg Extension", "Leg Curl", "Calf Raise", "Walking Lunge"] },
+    { name: "Thursday", exerciseNames: ["Treadmill Walk", "Medicine Ball Russian Twist", "Medicine Ball Slam"] },
+    { name: "Friday", exerciseNames: ["Incline DB Press", "Chest Press (Multi Press)", "Cable Lateral Raise", "Cable Shoulder Press", "Cable Triceps Pushdown"] },
+    { name: "Saturday", exerciseNames: ["Vertical Row", "Cable Row", "Lat Pulldown", "Cable / DB Curl", "Cable Face Pull"] },
+    { name: "Sunday", exerciseNames: ["Leg Press", "Leg Curl", "Calf Raise", "Walking Lunge", "Medicine Ball Russian Twist"] },
     { name: "Cool-down A", exerciseNames: ["Standing Hamstring Stretch", "Child's Pose"] },
     { name: "Cool-down B", exerciseNames: ["Chest/Shoulder Doorway Stretch", "Child's Pose"] },
     { name: "Cool-down C (Full)", exerciseNames: ["Standing Hamstring Stretch", "Chest/Shoulder Doorway Stretch", "Child's Pose"] }
@@ -2027,6 +2027,12 @@
       </div>
 
       <div class="wt-settings-card">
+        <div class="wt-settings-title">Rename Day Templates to Weekdays</div>
+        <div class="wt-settings-sub">One-time fix for templates already created with the old Push A/Pull A/Legs A/etc. names — renames them to Monday–Sunday in place (exercises inside are untouched). Safe to tap more than once.</div>
+        <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-rename-days-btn">Rename to Weekdays</button>
+      </div>
+
+      <div class="wt-settings-card">
         <div class="wt-settings-title">Normalize to 3×10</div>
         <div class="wt-settings-sub">Sets every exercise in your library to 3 sets of 10 reps in one tap. Doesn't touch weight, rest times, day, or muscle group — just sets/reps.</div>
         <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-normalize-btn">Set All to 3×10</button>
@@ -2125,6 +2131,21 @@
       } else {
         showToast(added ? `Added ${added} template${added === 1 ? "" : "s"}` : "You already have all of these");
       }
+      render();
+    });
+
+    document.getElementById("wt-rename-days-btn").addEventListener("click", async () => {
+      const DAY_RENAME_MAP = {
+        "push a": "Monday", "pull a": "Tuesday", "legs a": "Wednesday", "cardio + core": "Thursday",
+        "push b": "Friday", "pull b": "Saturday", "legs b": "Sunday"
+      };
+      let renamed = 0;
+      templates.forEach(t => {
+        const key = t.name.trim().toLowerCase();
+        if (DAY_RENAME_MAP[key]) { t.name = DAY_RENAME_MAP[key]; renamed++; }
+      });
+      await saveTemplates();
+      showToast(renamed ? `Renamed ${renamed} template${renamed === 1 ? "" : "s"}` : "No old-named templates found to rename");
       render();
     });
 
