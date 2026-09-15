@@ -583,6 +583,23 @@
     { id: "walking-lunge", name: "Walking Lunge", muscleGroup: "Legs", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 75, restNext: 60 }
   ];
 
+  const RECOMMENDED_EXTRA_EXERCISES = [
+    // Warm-up
+    { name: "Treadmill Jog", muscleGroup: "Cardio", mode: "cardio", category: "warmup", usesWeight: false, day: "", sets: 1, durationMin: 2, distanceMi: 0.15, restSets: 0, restNext: 60 },
+    { name: "Band Pull-Aparts", muscleGroup: "Shoulders", mode: "strength", category: "warmup", usesWeight: false, day: "", sets: 2, reps: 15, weight: 0, restSets: 30, restNext: 30 },
+    { name: "Bodyweight Squats", muscleGroup: "Legs", mode: "strength", category: "warmup", usesWeight: false, day: "", sets: 2, reps: 15, weight: 0, restSets: 30, restNext: 30 },
+    { name: "Cat-Cow Stretch", muscleGroup: "Core", mode: "strength", category: "warmup", usesWeight: false, day: "", sets: 2, reps: 10, weight: 0, restSets: 20, restNext: 30 },
+    // Main gap-fillers
+    { name: "Medicine Ball Russian Twist", muscleGroup: "Core", mode: "strength", category: "main", usesWeight: true, day: "", sets: 3, reps: 15, weight: 6, restSets: 45, restNext: 45 },
+    { name: "Medicine Ball Slam", muscleGroup: "Core", mode: "strength", category: "main", usesWeight: true, day: "", sets: 3, reps: 12, weight: 8, restSets: 60, restNext: 45 },
+    { name: "Cable Row", muscleGroup: "Back", mode: "strength", category: "main", usesWeight: true, day: "", sets: 3, reps: 10, weight: 0, restSets: 75, restNext: 60 },
+    { name: "Treadmill Walk", muscleGroup: "Cardio", mode: "cardio", category: "main", usesWeight: false, day: "", sets: 1, durationMin: 25, distanceMi: 1.5, restSets: 0, restNext: 60 },
+    // Cool-down / stretch (cardio mode reused for hold time — Distance left at 0, see Settings note)
+    { name: "Standing Hamstring Stretch", muscleGroup: "Legs", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 2, durationMin: 0.5, distanceMi: 0, restSets: 0, restNext: 15 },
+    { name: "Child's Pose", muscleGroup: "Core", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 1, distanceMi: 0, restSets: 0, restNext: 0 },
+    { name: "Chest/Shoulder Doorway Stretch", muscleGroup: "Chest", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 1, distanceMi: 0, restSets: 0, restNext: 0 }
+  ];
+
   function groupLibraryForDisplay(list) {
     const groups = {};
     list.forEach(e => {
@@ -1958,6 +1975,12 @@
       </div>
 
       <div class="wt-settings-card">
+        <div class="wt-settings-title">Add Starter Set (Warm-up / Cool-down)</div>
+        <div class="wt-settings-sub">Adds 11 exercises in one tap: 4 warm-up moves (Treadmill Jog, Band Pull-Aparts, Bodyweight Squats, Cat-Cow), 4 main gap-fillers (Medicine Ball Twist/Slam, Cable Row, Treadmill Walk), 3 cool-down stretches (Hamstring Stretch, Child's Pose, Doorway Stretch). Skips any name you already have — safe to tap more than once.</div>
+        <button class="wt-btn wt-btn-primary wt-btn-sm" id="wt-seed-btn">Add Starter Set</button>
+      </div>
+
+      <div class="wt-settings-card">
         <div class="wt-settings-title">Normalize to 3×10</div>
         <div class="wt-settings-sub">Sets every exercise in your library to 3 sets of 10 reps in one tap. Doesn't touch weight, rest times, day, or muscle group — just sets/reps.</div>
         <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-normalize-btn">Set All to 3×10</button>
@@ -2021,6 +2044,19 @@
       if (sbClient) await sbClient.auth.signOut();
       clearSbConfig();
       location.reload();
+    });
+
+    document.getElementById("wt-seed-btn").addEventListener("click", async () => {
+      const existingNames = new Set(library.map(e => e.name.trim().toLowerCase()));
+      let added = 0;
+      RECOMMENDED_EXTRA_EXERCISES.forEach(ex => {
+        if (existingNames.has(ex.name.trim().toLowerCase())) return;
+        library.push({ id: uid(), ...ex });
+        added++;
+      });
+      await saveLibrary();
+      showToast(added ? `Added ${added} exercise${added === 1 ? "" : "s"}` : "You already have all of these");
+      render();
     });
 
     document.getElementById("wt-normalize-btn").addEventListener("click", async () => {
