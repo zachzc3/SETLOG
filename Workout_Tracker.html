@@ -790,6 +790,14 @@
         `).join("")}
       </select>
     </div>`;
+    if (templates.length) {
+      html += `<div class="wt-addex-row">
+        <select id="wt-add-tpl-select">
+          <option value="">+ Add exercises from a template…</option>
+          ${templates.map(t => `<option value="${t.id}">${escapeHtml(t.name)} (${t.exerciseIds.length})</option>`).join("")}
+        </select>
+      </div>`;
+    }
 
     active.exercises.forEach((ex, exIdx) => {
       const allDone = ex.sets.every(s => s.done);
@@ -858,6 +866,9 @@
 
     document.getElementById("wt-add-select")?.addEventListener("change", (e) => {
       if (e.target.value) addExerciseToSession(e.target.value);
+    });
+    document.getElementById("wt-add-tpl-select")?.addEventListener("change", (e) => {
+      if (e.target.value) addTemplateToSession(e.target.value);
     });
     document.getElementById("wt-save-tpl-btn")?.addEventListener("click", () => {
       openTemplateModal({ id: null, name: "", exerciseIds: active.exercises.map(e => e.libId) });
@@ -1078,6 +1089,19 @@
       showToast("Rest times updated");
       render();
     });
+  }
+
+  function addTemplateToSession(tplId) {
+    const tpl = templates.find(t => t.id === tplId);
+    if (!tpl) return;
+    let added = 0;
+    tpl.exerciseIds.forEach(libId => {
+      const lib = library.find(e => e.id === libId);
+      if (lib) { active.exercises.push(buildSessionExercise(lib)); added++; }
+    });
+    saveActive();
+    showToast(added ? `Added ${added} exercise${added === 1 ? "" : "s"} from "${tpl.name}"` : "That template has no exercises");
+    render();
   }
 
   function startWorkoutFromTemplate(tplId) {
