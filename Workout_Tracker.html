@@ -647,9 +647,9 @@
   ];
 
   const RECOMMENDED_TEMPLATES = [
-    { name: "Warm-up A", exerciseNames: ["Treadmill Jog", "Band Pull-Aparts"] },
-    { name: "Warm-up B", exerciseNames: ["Bodyweight Squats", "Cat-Cow Stretch"] },
-    { name: "Warm-up C", exerciseNames: ["Treadmill Jog", "Cat-Cow Stretch"] },
+    { name: "Warm-up A", exerciseNames: ["Treadmill Jog", "Band Pull-Aparts", "Cat-Cow Stretch"] },
+    { name: "Warm-up B", exerciseNames: ["Treadmill Jog", "Bodyweight Squats", "Ankle Circles"] },
+    { name: "Warm-up C", exerciseNames: ["Treadmill Jog", "Cat-Cow Stretch", "Bodyweight Squats"] },
     { name: "Monday", exerciseNames: ["Chest Press (Multi Press)", "Incline DB Press", "Cable Shoulder Press", "Cable Lateral Raise", "Cable Triceps Pushdown"] },
     { name: "Tuesday", exerciseNames: ["Lat Pulldown", "Vertical Row", "Cable Row", "One-Arm DB Row", "Cable / DB Curl"] },
     { name: "Wednesday", exerciseNames: ["Leg Press", "Leg Extension", "Leg Curl", "Calf Raise", "Walking Lunge"] },
@@ -657,9 +657,9 @@
     { name: "Friday", exerciseNames: ["Incline DB Press", "Chest Press (Multi Press)", "Cable Lateral Raise", "Cable Shoulder Press", "Cable Triceps Pushdown"] },
     { name: "Saturday", exerciseNames: ["Vertical Row", "Cable Row", "Lat Pulldown", "Cable / DB Curl", "Cable Face Pull"] },
     { name: "Sunday", exerciseNames: ["Leg Press", "Leg Curl", "Calf Raise", "Walking Lunge", "Medicine Ball Russian Twist"] },
-    { name: "Cool-down A", exerciseNames: ["Standing Hamstring Stretch", "Child's Pose"] },
-    { name: "Cool-down B", exerciseNames: ["Chest/Shoulder Doorway Stretch", "Child's Pose"] },
-    { name: "Cool-down C (Full)", exerciseNames: ["Standing Hamstring Stretch", "Chest/Shoulder Doorway Stretch", "Child's Pose"] },
+    { name: "Cool-down A", exerciseNames: ["Cross-Body Shoulder Stretch", "Chest/Shoulder Doorway Stretch", "Triceps Stretch", "Lat Stretch", "Neck Stretch"] },
+    { name: "Cool-down B", exerciseNames: ["Standing Hamstring Stretch", "Quadriceps Stretch", "Calf Stretch", "Hip Flexor Stretch", "IT Band Stretch"] },
+    { name: "Cool-down C (Full)", exerciseNames: ["Child's Pose", "Cat-Cow Stretch", "Seated Spinal Twist", "Downward Dog", "Cobra Stretch"] },
     { name: "TV Stretch Routine", exerciseNames: ["Cat-Cow Stretch", "Downward Dog", "Cobra Stretch", "Seated Forward Fold", "Butterfly Stretch", "Figure-4 Glute Stretch", "Pigeon Pose", "Seated Spinal Twist", "Foam Roll Quads", "Legs Up the Wall", "Standing Hamstring Stretch", "Calf Stretch", "Quadriceps Stretch", "Hip Flexor Stretch", "IT Band Stretch", "Ankle Circles", "Knee-to-Chest Stretch", "Cross-Body Shoulder Stretch", "Lat Stretch", "Triceps Stretch", "Chest/Shoulder Doorway Stretch", "Neck Stretch", "Child's Pose"] }
   ];
 
@@ -2305,6 +2305,12 @@
       </div>
 
       <div class="wt-settings-card">
+        <div class="wt-settings-title">Update Warm-up / Cool-down Templates</div>
+        <div class="wt-settings-sub">Redesigns Warm-up A/B/C and Cool-down A/B/C in place — each now targets upper-body, lower-body, or general work instead of the original arbitrary 2-3 picks, using the full stretch library. Overwrites those 6 templates' exercise lists (creates them if missing); doesn't touch Push/Pull/Legs or Cardio + Core.</div>
+        <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-update-templates-btn">Update Templates</button>
+      </div>
+
+      <div class="wt-settings-card">
         <div class="wt-settings-title">Rename Day Templates to Weekdays</div>
         <div class="wt-settings-sub">One-time fix for templates already created with the old Push A/Pull A/Legs A/etc. names — renames them to Monday–Sunday in place (exercises inside are untouched). Safe to tap more than once.</div>
         <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-rename-days-btn">Rename to Weekdays</button>
@@ -2417,6 +2423,28 @@ Lat Pulldown	https://youtube.com/..."></textarea>
       } else {
         showToast(added ? `Added ${added} template${added === 1 ? "" : "s"}` : "You already have all of these");
       }
+      render();
+    });
+
+    document.getElementById("wt-update-templates-btn").addEventListener("click", async () => {
+      const TEMPLATE_UPDATE_TARGETS = ["Warm-up A", "Warm-up B", "Warm-up C", "Cool-down A", "Cool-down B", "Cool-down C (Full)"];
+      let updated = 0, created = 0;
+      const missingNames = new Set();
+      RECOMMENDED_TEMPLATES.forEach(t => {
+        if (!TEMPLATE_UPDATE_TARGETS.includes(t.name)) return;
+        const exerciseIds = [];
+        t.exerciseNames.forEach(n => {
+          const match = library.find(e => e.name.trim().toLowerCase() === n.trim().toLowerCase());
+          if (match) exerciseIds.push(match.id); else missingNames.add(n);
+        });
+        if (!exerciseIds.length) return;
+        const idx = templates.findIndex(x => x.name.trim().toLowerCase() === t.name.toLowerCase());
+        if (idx > -1) { templates[idx].exerciseIds = exerciseIds; updated++; }
+        else { templates.push({ id: uid(), name: t.name, exerciseIds }); created++; }
+      });
+      await saveTemplates();
+      const missingMsg = missingNames.size ? ` — missing: ${Array.from(missingNames).slice(0, 3).join(", ")}${missingNames.size > 3 ? "…" : ""}` : "";
+      showToast(`Updated ${updated}, created ${created}${missingMsg}`);
       render();
     });
 
