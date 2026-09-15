@@ -2250,8 +2250,14 @@
         <div class="wt-settings-title">Cloud Sync</div>
         <div class="wt-settings-sub">Signed in as ${escapeHtml(sbUser.email)}. Data syncs to any device you sign into with this account.</div>
         <div class="wt-settings-row">
+          <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-show-sb-config-btn">Show Connection Info</button>
           <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-migrate-btn">Push Local Data to Cloud</button>
           <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-signout-btn">Sign Out</button>
+        </div>
+        <div id="wt-sb-config-display" class="wt-hidden" style="margin-top:10px;">
+          <div class="wt-settings-sub">Copy this on your computer, get it to your other device however's easiest (text yourself, notes app, email), then paste it into that device's Cloud Sync setup fields.</div>
+          <textarea class="wt-textarea" id="wt-sb-config-text" readonly>${sbCfg ? escapeHtml("Project URL: " + sbCfg.url + "\nAnon Key: " + sbCfg.anonKey) : ""}</textarea>
+          <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-copy-sb-config-btn" style="margin-top:8px;">Copy to Clipboard</button>
         </div>
       </div>` : `
       <div class="wt-settings-card">
@@ -2367,6 +2373,14 @@ Lat Pulldown	https://youtube.com/..."></textarea>
 
     document.getElementById("wt-plate-open-btn").addEventListener("click", () => openPlateCalcModal(0));
 
+    document.getElementById("wt-show-sb-config-btn")?.addEventListener("click", () => {
+      document.getElementById("wt-sb-config-display").classList.toggle("wt-hidden");
+    });
+    document.getElementById("wt-copy-sb-config-btn")?.addEventListener("click", async () => {
+      const box = document.getElementById("wt-sb-config-text");
+      try { await navigator.clipboard.writeText(box.value); showToast("Copied"); }
+      catch (e) { box.select(); showToast("Select the text above and copy manually"); }
+    });
     document.getElementById("wt-sb-enable-btn")?.addEventListener("click", () => {
       const url = document.getElementById("wt-sb-url").value.trim();
       const anonKey = document.getElementById("wt-sb-key").value.trim();
