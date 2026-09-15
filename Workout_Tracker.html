@@ -345,6 +345,31 @@
   .wt-hist-ex-name { font-weight: 700; margin-bottom: 3px; }
   .wt-hist-set { color: var(--text-muted); }
 
+  /* History calendar view */
+  .wt-cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .wt-cal-nav-title { font-weight: 800; font-size: 15px; }
+  .wt-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .wt-cal-dow {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    padding-bottom: 4px;
+  }
+  .wt-cal-cell {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 4px;
+    overflow: hidden;
+  }
+  .wt-cal-cell.wt-cal-empty { visibility: hidden; }
+  .wt-cal-cell.wt-cal-has-data { background: var(--surface-2); border-color: var(--accent-dim); cursor: pointer; }
+  .wt-cal-daynum { font-weight: 800; font-size: 11px; color: var(--text); }
+  .wt-cal-stat { color: var(--accent); font-weight: 700; font-size: 9px; line-height: 1.25; margin-top: 2px; }
+
   /* Inline rest timer */
   .wt-inline-timer {
     background: var(--surface-2);
@@ -1806,14 +1831,46 @@
 
   // ---------- HISTORY VIEW ----------
   let expandedHistoryIds = new Set();
+  let historyViewMode = "list"; // "list" | "calendar"
+  let calendarMonth = new Date(); // which month the calendar is showing
+  let historyDateFilter = null; // "YYYY-MM-DD" set by tapping a calendar day, or null for all
+
+  function localDateKey(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function fmtCompactNum(n) {
+    return n >= 1000 ? (n / 1000).toFixed(1) + "k" : n.toLocaleString();
+  }
+  function historyToggleBarHtml() {
+    return `<div style="display:flex;gap:6px;margin-bottom:14px;">
+      <button class="wt-btn ${historyViewMode === "list" ? "wt-btn-primary" : "wt-btn-ghost"} wt-btn-sm" id="wt-hist-mode-list" style="flex:1;">List</button>
+      <button class="wt-btn ${historyViewMode === "calendar" ? "wt-btn-primary" : "wt-btn-ghost"} wt-btn-sm" id="wt-hist-mode-cal" style="flex:1;">Calendar</button>
+    </div>`;
+  }
+  function wireHistoryToggle() {
+    document.getElementById("wt-hist-mode-list").addEventListener("click", () => { historyViewMode = "list"; render(); });
+    document.getElementById("wt-hist-mode-cal").addEventListener("click", () => { historyViewMode = "calendar"; render(); });
+  }
 
   function renderHistory() {
+    if (historyViewMode === "calendar") { renderHistoryCalendar(); return; }
+
+    const toggleBar = historyToggleBarHtml();
     if (!sessions.length) {
-      $view.innerHTML = `<div class="wt-empty"><div class="wt-empty-title">No workouts logged yet</div>Finish a session and it'll show up here.</div>`;
+      $view.innerHTML = toggleBar + `<div class="wt-empty"><div class="wt-empty-title">No workouts logged yet</div>Finish a session and it'll show up here.</div>`;
+      wireHistoryToggle();
       return;
     }
-    let html = "";
-    sessions.forEach(s => {
+    let html = toggleBar;
+    if (historyDateFilter) {
+      html += `<div class="wt-settings-sub" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span>Showing ${historyDateFilter}</span>
+        <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-hist-clear-filter">Show All</button>
+      </div>`;
+    }
+    const filtered = historyDateFilter ? sessions.filter(s => localDateKey(new Date(s.date)) === historyDateFilter) : sessions;
+    if (!filtered.length) html += `<div class="wt-empty">No sessions logged on this date.</div>`;
+    filtered.forEach(s => {
       const d = new Date(s.date);
       const stats = sessionStats(s);
       const parts = [];
@@ -1841,11 +1898,68 @@
       html += `</div>`;
     });
     $view.innerHTML = html;
+    wireHistoryToggle();
+    document.getElementById("wt-hist-clear-filter")?.addEventListener("click", () => { historyDateFilter = null; render(); });
     document.querySelectorAll("[data-hist-toggle]").forEach(card => {
       card.addEventListener("click", () => {
         const id = card.dataset.histToggle;
         if (expandedHistoryIds.has(id)) expandedHistoryIds.delete(id);
         else expandedHistoryIds.add(id);
+        render();
+      });
+    });
+  }
+
+  function renderHistoryCalendar() {
+    const year = calendarMonth.getFullYear();
+    const month = calendarMonth.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const startOffset = new Date(year, month, 1).getDay();
+
+    const byDate = {};
+    sessions.forEach(s => {
+      const key = localDateKey(new Date(s.date));
+      const stats = sessionStats(s);
+      if (!byDate[key]) byDate[key] = { weight: 0, duration: 0, cardioMi: 0 };
+      byDate[key].weight += stats.totalWeight;
+      byDate[key].duration += stats.durationMin || 0;
+      byDate[key].cardioMi += stats.cardioMi;
+    });
+
+    const monthLabel = calendarMonth.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+    const dow = ["S", "M", "T", "W", "T", "F", "S"];
+
+    let html = historyToggleBarHtml();
+    html += `<div class="wt-cal-nav">
+      <button class="wt-iconbtn" id="wt-cal-prev">‹</button>
+      <div class="wt-cal-nav-title">${monthLabel}</div>
+      <button class="wt-iconbtn" id="wt-cal-next">›</button>
+    </div>
+    <div class="wt-cal-grid">
+      ${dow.map(d => `<div class="wt-cal-dow">${d}</div>`).join("")}
+      ${Array.from({ length: startOffset }).map(() => `<div class="wt-cal-cell wt-cal-empty"></div>`).join("")}
+      ${Array.from({ length: daysInMonth }).map((_, i) => {
+        const dayNum = i + 1;
+        const key = year + "-" + String(month + 1).padStart(2, "0") + "-" + String(dayNum).padStart(2, "0");
+        const data = byDate[key];
+        return `<div class="wt-cal-cell ${data ? "wt-cal-has-data" : ""}" ${data ? `data-cal-date="${key}"` : ""}>
+          <div class="wt-cal-daynum">${dayNum}</div>
+          ${data ? `
+            ${data.weight > 0 ? `<div class="wt-cal-stat">${fmtCompactNum(data.weight)}lb</div>` : ""}
+            ${data.duration > 0 ? `<div class="wt-cal-stat">${data.duration}m</div>` : ""}
+            ${data.cardioMi > 0 ? `<div class="wt-cal-stat">${data.cardioMi.toFixed(1)}mi</div>` : ""}
+          ` : ""}
+        </div>`;
+      }).join("")}
+    </div>`;
+    $view.innerHTML = html;
+    wireHistoryToggle();
+    document.getElementById("wt-cal-prev").addEventListener("click", () => { calendarMonth = new Date(year, month - 1, 1); render(); });
+    document.getElementById("wt-cal-next").addEventListener("click", () => { calendarMonth = new Date(year, month + 1, 1); render(); });
+    document.querySelectorAll("[data-cal-date]").forEach(cell => {
+      cell.addEventListener("click", () => {
+        historyDateFilter = cell.dataset.calDate;
+        historyViewMode = "list";
         render();
       });
     });
