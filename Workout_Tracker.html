@@ -1295,9 +1295,10 @@
     editingExerciseId = id;
     const ex = id ? library.find(e => e.id === id) : {
       name: "", usesWeight: true, sets: 3, reps: 10, weight: 0, durationMin: 20, distanceMi: 1,
-      restSets: 75, restNext: 60, day: "", muscleGroup: "Other", mode: "strength"
+      restSets: 75, restNext: 60, day: "", muscleGroup: "Other", mode: "strength", category: "main"
     };
     const mode = ex.mode || "strength";
+    const category = ex.category || "main";
     const dayOptions = ["", "Push", "Pull", "Legs", "Cardio"];
     const root = document.getElementById("wt-modal-root");
     root.innerHTML = `
@@ -1323,12 +1324,22 @@
                 </select>
               </div>
             </div>
-            <div>
-              <label>Type</label>
-              <select id="wt-f-mode">
-                <option value="strength" ${mode === "strength" ? "selected" : ""}>Strength (sets/reps/weight)</option>
-                <option value="cardio" ${mode === "cardio" ? "selected" : ""}>Cardio (time/distance)</option>
-              </select>
+            <div class="wt-form-row">
+              <div>
+                <label>Type</label>
+                <select id="wt-f-mode">
+                  <option value="strength" ${mode === "strength" ? "selected" : ""}>Strength (sets/reps/weight)</option>
+                  <option value="cardio" ${mode === "cardio" ? "selected" : ""}>Cardio / Time+Distance</option>
+                </select>
+              </div>
+              <div>
+                <label>Category</label>
+                <select id="wt-f-category">
+                  <option value="warmup" ${category === "warmup" ? "selected" : ""}>Warm-up</option>
+                  <option value="main" ${category === "main" ? "selected" : ""}>Main</option>
+                  <option value="cooldown" ${category === "cooldown" ? "selected" : ""}>Cool-down / Stretch</option>
+                </select>
+              </div>
             </div>
             <div class="wt-toggle-row ${mode === "cardio" ? "wt-hidden" : ""}" id="wt-f-usesweight-row">
               <span>Uses weight</span>
@@ -1405,6 +1416,7 @@
         day: document.getElementById("wt-f-day").value,
         muscleGroup: document.getElementById("wt-f-musclegroup").value,
         mode: exMode,
+        category: document.getElementById("wt-f-category").value,
         sets: parseInt(document.getElementById("wt-f-sets").value) || 1,
         restSets: parseInt(document.getElementById("wt-f-restsets").value) || 0,
         restNext: parseInt(document.getElementById("wt-f-restnext").value) || 0
@@ -1575,11 +1587,22 @@
   // ---------- TEMPLATES ----------
   // existing: null for a brand-new template, or { id, name, exerciseIds } to edit/prefill.
   // If existing.id is set, saving updates that template in place instead of creating a new one.
+  let tplSelectedOrder = []; // exercise ids in the order they were added — becomes the template's exerciseIds
+  let tplActiveCategory = "main";
+  const TPL_CATEGORY_LABELS = { warmup: "Warm-up", main: "Main", cooldown: "Cool-down / Stretch" };
+
   function openTemplateModal(existing) {
     const tplId = existing && existing.id ? existing.id : null;
     const prefillName = existing && existing.name ? existing.name : "";
-    const ids = new Set(existing && existing.exerciseIds ? existing.exerciseIds : []);
+    tplSelectedOrder = existing && existing.exerciseIds ? existing.exerciseIds.slice() : [];
+    tplActiveCategory = "main";
+    renderTemplateModalBody(tplId, prefillName);
+  }
+
+  function renderTemplateModalBody(tplId, currentName) {
     const root = document.getElementById("wt-modal-root");
+    const catExercises = library.filter(e => (e.category || "main") === tplActiveCategory);
+    const grouped = groupLibraryForDisplay(catExercises);
     root.innerHTML = `
       <div class="wt-modal-backdrop" id="wt-tpl-backdrop">
         <div class="wt-modal">
@@ -1587,20 +1610,25 @@
           <div class="wt-form">
             <div>
               <label>Name</label>
-              <input type="text" id="wt-tpl-name" value="${escapeHtml(prefillName)}" placeholder="e.g. Push Day A">
+              <input type="text" id="wt-tpl-name" value="${escapeHtml(currentName)}" placeholder="e.g. Push Day A">
             </div>
           </div>
-          <div class="wt-settings-sub" style="margin:12px 0 4px;">Select exercises:</div>
+          <div style="display:flex;gap:6px;margin:14px 0 8px;">
+            ${["warmup", "main", "cooldown"].map(c => `
+              <button class="wt-btn ${tplActiveCategory === c ? "wt-btn-primary" : "wt-btn-ghost"} wt-btn-sm" data-tpl-cat="${c}" style="flex:1;">${TPL_CATEGORY_LABELS[c]}</button>
+            `).join("")}
+          </div>
+          <div class="wt-settings-sub" style="margin-bottom:4px;">${tplSelectedOrder.length} exercise${tplSelectedOrder.length === 1 ? "" : "s"} selected total, across all 3 tabs</div>
           <div id="wt-tpl-list">
-            ${library.length ? groupLibraryForDisplay(library).map(({ group, exercises }) => `
+            ${catExercises.length ? grouped.map(({ group, exercises }) => `
               <div class="wt-settings-title" style="margin:14px 0 4px;">${escapeHtml(group)}</div>
               ${exercises.map(e => `
                 <label class="wt-ai-preview-item">
-                  <input type="checkbox" data-tpl-ex="${e.id}" ${ids.has(e.id) ? "checked" : ""}>
+                  <input type="checkbox" data-tpl-ex="${e.id}" ${tplSelectedOrder.includes(e.id) ? "checked" : ""}>
                   <div class="wt-ai-preview-name">${escapeHtml(e.name)}</div>
                 </label>
               `).join("")}
-            `).join("") : `<div class="wt-settings-sub">Add some exercises in the Exercises tab first.</div>`}
+            `).join("") : `<div class="wt-settings-sub">No ${TPL_CATEGORY_LABELS[tplActiveCategory].toLowerCase()} exercises yet — add some in the Exercises tab and set their Category there.</div>`}
           </div>
           <div class="wt-modal-actions">
             <button class="wt-btn wt-btn-ghost" id="wt-tpl-cancel">Cancel</button>
@@ -1612,6 +1640,22 @@
       if (e.target.id === "wt-tpl-backdrop") closeModal();
     });
     document.getElementById("wt-tpl-cancel").addEventListener("click", closeModal);
+    document.querySelectorAll("[data-tpl-cat]").forEach(b => {
+      b.addEventListener("click", () => {
+        tplActiveCategory = b.dataset.tplCat;
+        renderTemplateModalBody(tplId, document.getElementById("wt-tpl-name").value);
+      });
+    });
+    document.querySelectorAll("[data-tpl-ex]").forEach(cb => {
+      cb.addEventListener("change", () => {
+        const exId = cb.dataset.tplEx;
+        if (cb.checked) {
+          if (!tplSelectedOrder.includes(exId)) tplSelectedOrder.push(exId);
+        } else {
+          tplSelectedOrder = tplSelectedOrder.filter(x => x !== exId);
+        }
+      });
+    });
     document.getElementById("wt-tpl-save").addEventListener("click", () => {
       const nameInput = document.getElementById("wt-tpl-name");
       const name = nameInput.value.trim();
@@ -1620,11 +1664,11 @@
         nameInput.focus();
         return;
       }
-      const exerciseIds = Array.from(document.querySelectorAll("[data-tpl-ex]:checked")).map(cb => cb.dataset.tplEx);
-      if (!exerciseIds.length) {
+      if (!tplSelectedOrder.length) {
         showToast("⚠ Select at least one exercise");
         return;
       }
+      const exerciseIds = tplSelectedOrder.slice();
       if (tplId) {
         const idx = templates.findIndex(t => t.id === tplId);
         if (idx > -1) templates[idx] = { id: tplId, name, exerciseIds };
