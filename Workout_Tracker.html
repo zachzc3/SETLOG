@@ -630,7 +630,8 @@
     { name: "Seated Spinal Twist", muscleGroup: "Core", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 2, durationMin: 1, distanceMi: 0, restSets: 15, restNext: 20 },
     { name: "Neck Stretch", muscleGroup: "Shoulders", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 1, distanceMi: 0, restSets: 0, restNext: 15 },
     { name: "Butterfly Stretch", muscleGroup: "Legs", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 1.5, distanceMi: 0, restSets: 0, restNext: 20 },
-    { name: "Foam Roll Quads", muscleGroup: "Legs", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 2, distanceMi: 0, restSets: 0, restNext: 20 }
+    { name: "Foam Roll Quads", muscleGroup: "Legs", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 2, distanceMi: 0, restSets: 0, restNext: 20 },
+    { name: "Legs Up the Wall", muscleGroup: "Legs", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 3, distanceMi: 0, restSets: 0, restNext: 0, videoUrl: "https://youtu.be/RWVmztMYL9I?si=cv0zwV4vPatmR-_-" }
   ];
 
   const RECOMMENDED_TEMPLATES = [
@@ -647,7 +648,7 @@
     { name: "Cool-down A", exerciseNames: ["Standing Hamstring Stretch", "Child's Pose"] },
     { name: "Cool-down B", exerciseNames: ["Chest/Shoulder Doorway Stretch", "Child's Pose"] },
     { name: "Cool-down C (Full)", exerciseNames: ["Standing Hamstring Stretch", "Chest/Shoulder Doorway Stretch", "Child's Pose"] },
-    { name: "TV Stretch Routine", exerciseNames: ["Cat-Cow Stretch", "Downward Dog", "Seated Forward Fold", "Butterfly Stretch", "Figure-4 Glute Stretch", "Seated Spinal Twist", "Foam Roll Quads", "Standing Hamstring Stretch", "Chest/Shoulder Doorway Stretch", "Neck Stretch", "Child's Pose"] }
+    { name: "TV Stretch Routine", exerciseNames: ["Cat-Cow Stretch", "Downward Dog", "Seated Forward Fold", "Butterfly Stretch", "Figure-4 Glute Stretch", "Seated Spinal Twist", "Foam Roll Quads", "Legs Up the Wall", "Standing Hamstring Stretch", "Chest/Shoulder Doorway Stretch", "Neck Stretch", "Child's Pose"] }
   ];
 
   const EXERCISE_GUIDES = {
@@ -683,7 +684,8 @@
     "seated spinal twist": ["Sit with legs extended, then bend one knee and cross it over the other leg.", "Place the opposite elbow outside the bent knee and gently rotate your torso toward it.", "Keep your spine tall rather than slouching into the twist.", "Hold, then switch sides."],
     "neck stretch": ["Sit or stand tall, shoulders relaxed.", "Gently tilt your head toward one shoulder until you feel a stretch along the opposite side of your neck.", "Hold without pulling — let gravity do the work.", "Return to center, then switch sides."],
     "butterfly stretch": ["Sit with the soles of your feet together, knees out to the sides.", "Hold your feet and gently let your knees drop toward the floor.", "Keep your back straight rather than hunching forward.", "Hold — don't bounce your knees."],
-    "foam roll quads": ["Lie face-down, roller positioned under your thighs.", "Support your weight on your forearms and slowly roll from hip to knee.", "Pause on any tender spots for a few seconds.", "Keep your core engaged so your lower back doesn't sag."]
+    "foam roll quads": ["Lie face-down, roller positioned under your thighs.", "Support your weight on your forearms and slowly roll from hip to knee.", "Pause on any tender spots for a few seconds.", "Keep your core engaged so your lower back doesn't sag."],
+    "legs up the wall": ["Sit sideways next to a wall, hip touching it.", "Swing your legs up the wall as you lie back onto the floor.", "Scoot your hips as close to the wall as is comfortable.", "Relax your arms out to the sides and breathe slowly — this is passive, not something to push into."]
   };
 
   function renderMuscleDiagram(muscleGroup) {
@@ -955,6 +957,7 @@
             <button class="wt-iconbtn" data-move-ex="${exIdx}:-1" ${exIdx === 0 ? "disabled" : ""} title="Move up">▲</button>
             <button class="wt-iconbtn" data-move-ex="${exIdx}:1" ${exIdx === active.exercises.length - 1 ? "disabled" : ""} title="Move down">▼</button>
             <button class="wt-iconbtn" data-edit-session-ex="${exIdx}" title="Edit rest times">✎</button>
+            <button class="wt-iconbtn" data-guide-session="${ex.libId}" title="How to / video">📖</button>
             ${ex.mode !== "cardio" && ex.usesWeight ? `<button class="wt-iconbtn" data-plate-ex="${exIdx}" title="Plate calculator">🏋</button>` : ""}
             ${ex.mode !== "cardio" ? `<button class="wt-iconbtn ${ex.sets.some(s => s.isWarmup) ? "wt-iconbtn-active" : ""}" data-toggle-warmup="${exIdx}" title="Toggle warm-up set">W</button>` : ""}
             <button class="wt-iconbtn" data-remove-ex="${exIdx}">✕</button>
@@ -1037,6 +1040,9 @@
     });
     document.querySelectorAll("[data-edit-session-ex]").forEach(b => {
       b.addEventListener("click", () => openSessionExerciseEditModal(parseInt(b.dataset.editSessionEx)));
+    });
+    document.querySelectorAll("[data-guide-session]").forEach(b => {
+      b.addEventListener("click", () => openExerciseGuideModal(b.dataset.guideSession));
     });
     document.querySelectorAll("[data-add-set]").forEach(b => {
       b.addEventListener("click", () => addSetToExercise(parseInt(b.dataset.addSet)));
@@ -2249,13 +2255,13 @@
 
       <div class="wt-settings-card">
         <div class="wt-settings-title">Add Starter Set (Warm-up / Cool-down)</div>
-        <div class="wt-settings-sub">Adds 18 exercises in one tap: 4 warm-up moves, 4 main gap-fillers, and 10 cool-down/flexibility stretches (including a longer set meant for a standalone TV stretch session — Downward Dog, Seated Forward Fold, Butterfly, Figure-4, Spinal Twist, Foam Roll Quads, Neck Stretch). Skips any name you already have — safe to tap more than once.</div>
+        <div class="wt-settings-sub">Adds 19 exercises in one tap: 4 warm-up moves, 4 main gap-fillers, and 11 cool-down/flexibility stretches (including a longer set meant for a standalone TV stretch session — Downward Dog, Seated Forward Fold, Butterfly, Figure-4, Spinal Twist, Foam Roll Quads, Legs Up the Wall, Neck Stretch). Skips any name you already have — safe to tap more than once.</div>
         <button class="wt-btn wt-btn-primary wt-btn-sm" id="wt-seed-btn">Add Starter Set</button>
       </div>
 
       <div class="wt-settings-card">
         <div class="wt-settings-title">Create Starter Templates</div>
-        <div class="wt-settings-sub">Builds 14 templates in one tap: Warm-up A/B/C, Push/Pull/Legs A/B, Cardio + Core, Cool-down A/B/C (Full), and a separate "TV Stretch Routine" (11 stretches, longer holds, meant to stand alone — not tied to a workout). Matches exercises by name from your library — add the Starter Set above first, or it'll skip whatever it can't find and tell you what's missing.</div>
+        <div class="wt-settings-sub">Builds 14 templates in one tap: Warm-up A/B/C, Push/Pull/Legs A/B, Cardio + Core, Cool-down A/B/C (Full), and a separate "TV Stretch Routine" (12 stretches, longer holds, meant to stand alone — not tied to a workout). Matches exercises by name from your library — add the Starter Set above first, or it'll skip whatever it can't find and tell you what's missing.</div>
         <button class="wt-btn wt-btn-primary wt-btn-sm" id="wt-seed-templates-btn">Create Starter Templates</button>
       </div>
 
