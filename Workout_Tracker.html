@@ -2250,6 +2250,14 @@
       </div>
 
       <div class="wt-settings-card">
+        <div class="wt-settings-title">Bulk Add Video Links</div>
+        <div class="wt-settings-sub">Paste exercise name + video link, one per line. Works straight from Excel — build two columns (Name, URL), select both, copy, paste in here. Also accepts "Name | URL" or "Name, URL" if typing by hand. Matches by exact exercise name; anything that doesn't match gets reported so you can fix a typo and retry.</div>
+        <textarea class="wt-textarea" id="wt-bulk-video-input" placeholder="Chest Press (Multi Press)	https://youtube.com/...
+Lat Pulldown	https://youtube.com/..."></textarea>
+        <button class="wt-btn wt-btn-primary wt-btn-sm" id="wt-bulk-video-btn" style="margin-top:10px;">Apply Links</button>
+      </div>
+
+      <div class="wt-settings-card">
         <div class="wt-settings-title">Normalize to 3×10</div>
         <div class="wt-settings-sub">Sets every exercise in your library to 3 sets of 10 reps in one tap. Doesn't touch weight, rest times, day, or muscle group — just sets/reps.</div>
         <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-normalize-btn">Set All to 3×10</button>
@@ -2363,6 +2371,30 @@
       });
       await saveTemplates();
       showToast(renamed ? `Renamed ${renamed} template${renamed === 1 ? "" : "s"}` : "No old-named templates found to rename");
+      render();
+    });
+
+    document.getElementById("wt-bulk-video-btn").addEventListener("click", async () => {
+      const raw = document.getElementById("wt-bulk-video-input").value;
+      const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      let matched = 0;
+      const unmatched = [];
+      lines.forEach(line => {
+        let parts;
+        if (line.includes("\t")) parts = line.split("\t");
+        else if (line.includes("|")) parts = line.split("|");
+        else parts = line.split(/,(.+)/);
+        if (parts.length < 2) return;
+        const name = (parts[0] || "").trim();
+        const url = (parts[1] || "").trim();
+        if (!name || !url) return;
+        const match = library.find(e => e.name.trim().toLowerCase() === name.toLowerCase());
+        if (match) { match.videoUrl = url; matched++; }
+        else unmatched.push(name);
+      });
+      await saveLibrary();
+      const unmatchedMsg = unmatched.length ? ` — no match: ${unmatched.slice(0, 3).join(", ")}${unmatched.length > 3 ? "…" : ""}` : "";
+      showToast(matched ? `Applied ${matched} link${matched === 1 ? "" : "s"}${unmatchedMsg}` : `No links applied${unmatchedMsg || " — check the format"}`);
       render();
     });
 
