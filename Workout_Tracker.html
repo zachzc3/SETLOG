@@ -638,7 +638,12 @@
     { name: "Hip Flexor Stretch", muscleGroup: "Legs", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 2, durationMin: 0.5, distanceMi: 0, restSets: 10, restNext: 20 },
     { name: "IT Band Stretch", muscleGroup: "Legs", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 2, durationMin: 0.5, distanceMi: 0, restSets: 10, restNext: 20 },
     { name: "Knee-to-Chest Stretch", muscleGroup: "Core", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 2, durationMin: 0.5, distanceMi: 0, restSets: 10, restNext: 20 },
-    { name: "Cross-Body Shoulder Stretch", muscleGroup: "Shoulders", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 2, durationMin: 0.5, distanceMi: 0, restSets: 10, restNext: 20 }
+    { name: "Cross-Body Shoulder Stretch", muscleGroup: "Shoulders", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 2, durationMin: 0.5, distanceMi: 0, restSets: 10, restNext: 20 },
+    { name: "Triceps Stretch", muscleGroup: "Arms", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 2, durationMin: 0.5, distanceMi: 0, restSets: 10, restNext: 20 },
+    { name: "Cobra Stretch", muscleGroup: "Core", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 0.5, distanceMi: 0, restSets: 0, restNext: 20 },
+    { name: "Pigeon Pose", muscleGroup: "Legs", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 2, durationMin: 1, distanceMi: 0, restSets: 15, restNext: 20 },
+    { name: "Lat Stretch", muscleGroup: "Back", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 2, durationMin: 0.5, distanceMi: 0, restSets: 10, restNext: 20 },
+    { name: "Ankle Circles", muscleGroup: "Legs", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 2, durationMin: 0.5, distanceMi: 0, restSets: 5, restNext: 15 }
   ];
 
   const RECOMMENDED_TEMPLATES = [
@@ -655,7 +660,7 @@
     { name: "Cool-down A", exerciseNames: ["Standing Hamstring Stretch", "Child's Pose"] },
     { name: "Cool-down B", exerciseNames: ["Chest/Shoulder Doorway Stretch", "Child's Pose"] },
     { name: "Cool-down C (Full)", exerciseNames: ["Standing Hamstring Stretch", "Chest/Shoulder Doorway Stretch", "Child's Pose"] },
-    { name: "TV Stretch Routine", exerciseNames: ["Cat-Cow Stretch", "Downward Dog", "Seated Forward Fold", "Butterfly Stretch", "Figure-4 Glute Stretch", "Seated Spinal Twist", "Foam Roll Quads", "Legs Up the Wall", "Standing Hamstring Stretch", "Calf Stretch", "Quadriceps Stretch", "Hip Flexor Stretch", "IT Band Stretch", "Knee-to-Chest Stretch", "Cross-Body Shoulder Stretch", "Chest/Shoulder Doorway Stretch", "Neck Stretch", "Child's Pose"] }
+    { name: "TV Stretch Routine", exerciseNames: ["Cat-Cow Stretch", "Downward Dog", "Cobra Stretch", "Seated Forward Fold", "Butterfly Stretch", "Figure-4 Glute Stretch", "Pigeon Pose", "Seated Spinal Twist", "Foam Roll Quads", "Legs Up the Wall", "Standing Hamstring Stretch", "Calf Stretch", "Quadriceps Stretch", "Hip Flexor Stretch", "IT Band Stretch", "Ankle Circles", "Knee-to-Chest Stretch", "Cross-Body Shoulder Stretch", "Lat Stretch", "Triceps Stretch", "Chest/Shoulder Doorway Stretch", "Neck Stretch", "Child's Pose"] }
   ];
 
   const EXERCISE_GUIDES = {
@@ -698,7 +703,12 @@
     "hip flexor stretch": ["Kneel on one knee (your mat works for cushioning), other foot planted forward.", "Keep a hand on your hip to avoid arching your lower back.", "Lean your weight forward onto your front leg until you feel a stretch in the back hip.", "Hold, then switch sides."],
     "it band stretch": ["Stand near a wall for support.", "Cross one leg behind the other at the ankles.", "Reach the same-side arm overhead, leaning away from that side.", "Hold, then switch sides."],
     "knee-to-chest stretch": ["Lie on your back on a firm surface (your mat works well).", "Gently pull one knee up toward your chest with both hands.", "Keep your other leg relaxed on the floor.", "Hold, then switch sides."],
-    "cross-body shoulder stretch": ["Bring one arm straight across your body.", "Hold it in place with your other arm, just above or below the elbow.", "Keep your shoulder down, away from your ear.", "Hold, then switch arms."]
+    "cross-body shoulder stretch": ["Bring one arm straight across your body.", "Hold it in place with your other arm, just above or below the elbow.", "Keep your shoulder down, away from your ear.", "Hold, then switch arms."],
+    "triceps stretch": ["Raise one arm overhead, then bend the elbow so your hand drops behind your head.", "Use your other hand to gently press down on that elbow.", "Keep your torso upright — don't lean to the side.", "Hold, then switch arms."],
+    "cobra stretch": ["Lie face-down, hands under your shoulders.", "Press through your hands to lift your chest off the floor, keeping hips down.", "Keep some bend in your elbows — don't force a full lockout.", "Hold, then lower back down."],
+    "pigeon pose": ["From hands and knees, bring one knee forward behind your wrist, shin angled across your body.", "Extend your other leg straight back behind you.", "Square your hips forward and fold over your front leg as far as comfortable.", "Hold, then switch sides."],
+    "lat stretch": ["Reach one arm overhead and lean your torso to the opposite side.", "Feel the stretch along the side of your body from your armpit down.", "Keep your hips square — don't twist, just lean.", "Hold, then switch sides."],
+    "ankle circles": ["Sit or stand, lift one foot slightly off the floor.", "Rotate your ankle slowly in a full circle, both directions.", "Keep the movement controlled, not fast or forced.", "Switch feet."]
   };
 
   function renderMuscleDiagram(muscleGroup) {
@@ -2284,13 +2294,13 @@
 
       <div class="wt-settings-card">
         <div class="wt-settings-title">Add Starter Set (Warm-up / Cool-down)</div>
-        <div class="wt-settings-sub">Adds 25 exercises in one tap: 4 warm-up moves, 4 main gap-fillers, and 17 cool-down/flexibility stretches — including the full Mayo Clinic basic-stretches set (Calf, Quad, Hip Flexor, IT Band, Knee-to-Chest, Cross-Body Shoulder, Hamstring, Neck) plus extras (Downward Dog, Seated Forward Fold, Butterfly, Figure-4, Spinal Twist, Foam Roll Quads, Legs Up the Wall). Skips any name you already have — safe to tap more than once.</div>
+        <div class="wt-settings-sub">Adds 30 exercises in one tap: 4 warm-up moves, 4 main gap-fillers, and 22 cool-down/flexibility stretches — the full Mayo Clinic basic-stretches set (Calf, Quad, Hip Flexor, IT Band, Knee-to-Chest, Cross-Body Shoulder, Hamstring, Neck) plus a full-body set covering spine, hips, arms, and back (Cobra, Pigeon Pose, Lat Stretch, Triceps Stretch, Ankle Circles, and more). Skips any name you already have — safe to tap more than once.</div>
         <button class="wt-btn wt-btn-primary wt-btn-sm" id="wt-seed-btn">Add Starter Set</button>
       </div>
 
       <div class="wt-settings-card">
         <div class="wt-settings-title">Create Starter Templates</div>
-        <div class="wt-settings-sub">Builds 14 templates in one tap: Warm-up A/B/C, Push/Pull/Legs A/B, Cardio + Core, Cool-down A/B/C (Full), and a separate "TV Stretch Routine" (18 stretches, full-body, meant to stand alone — not tied to a workout). Matches exercises by name from your library — add the Starter Set above first, or it'll skip whatever it can't find and tell you what's missing.</div>
+        <div class="wt-settings-sub">Builds 14 templates in one tap: Warm-up A/B/C, Push/Pull/Legs A/B, Cardio + Core, Cool-down A/B/C (Full), and a separate "TV Stretch Routine" (23 stretches, full-body, meant to stand alone — not tied to a workout). Matches exercises by name from your library — add the Starter Set above first, or it'll skip whatever it can't find and tell you what's missing.</div>
         <button class="wt-btn wt-btn-primary wt-btn-sm" id="wt-seed-templates-btn">Create Starter Templates</button>
       </div>
 
