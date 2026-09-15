@@ -641,6 +641,93 @@
     { name: "Cool-down C (Full)", exerciseNames: ["Standing Hamstring Stretch", "Chest/Shoulder Doorway Stretch", "Child's Pose"] }
   ];
 
+  const EXERCISE_GUIDES = {
+    "chest press (multi press)": ["Adjust seat so handles line up with mid-chest.", "Feet flat, back against the pad, wrists straight.", "Press forward until arms extend without locking elbows.", "Control the return — don't let the stack slam."],
+    "cable shoulder press": ["Set handles to shoulder height, seated with back supported.", "Press directly overhead until arms extend.", "Avoid arching your lower back to finish the press.", "Lower with control back to shoulder height."],
+    "incline db press": ["Set the bench to a 30-45° incline.", "Hold dumbbells at shoulder level, palms forward.", "Press up and slightly together without locking elbows.", "Lower slowly until you feel a stretch in the chest."],
+    "cable lateral raise": ["Stand side-on to the low pulley, handle in the far hand.", "Raise your arm out to shoulder height, leading with the elbow.", "Keep a slight bend in the arm throughout.", "Lower with control — don't swing or use momentum."],
+    "cable triceps pushdown": ["Grip the attachment, elbows tucked at your sides.", "Push down until arms fully extend.", "Keep elbows stationary — don't let them flare out.", "Return with control."],
+    "vertical row": ["Chest against the pad, grip handles at shoulder width.", "Pull handles toward your torso, squeezing shoulder blades together.", "Keep a slight arch in your back.", "Return with control."],
+    "lat pulldown": ["Grip the bar wider than shoulder width, thighs secured.", "Pull the bar to your upper chest, leading with elbows not hands.", "Control the return to full arm extension.", "Avoid leaning back excessively to move more weight."],
+    "cable face pull": ["Set the pulley to face height with a rope attachment.", "Pull toward your face, elbows high and out.", "Squeeze your shoulder blades together at the end.", "Keep your torso still — no leaning back for momentum."],
+    "one-arm db row": ["One knee and hand on a bench, other foot on the floor, back flat.", "Pull the dumbbell toward your hip, elbow close to your body.", "Lower under control to full arm extension.", "Avoid twisting your torso to move the weight."],
+    "cable / db curl": ["Elbows tucked at your sides, palms facing up.", "Curl the weight up without swinging your torso.", "Pause briefly at the top.", "Lower slowly — the negative matters as much as the lift."],
+    "leg press": ["Feet shoulder-width on the platform, back flat against the pad.", "Lower until knees reach about 90° — don't let knees cave inward.", "Press through your heels back to start.", "Don't lock your knees out at the top."],
+    "leg extension": ["Back against the pad, shin pad resting just above your ankles.", "Extend legs until nearly straight, pause briefly at the top.", "Lower with control — don't let the stack drop.", "Avoid using momentum to kick the weight up."],
+    "leg curl": ["Pad positioned against the back of your ankles.", "Curl your heels toward your glutes, squeezing your hamstrings.", "Lower slowly, resisting the weight the whole way.", "Avoid arching your back to assist the movement."],
+    "calf raise": ["Balls of your feet on the platform, heels hanging off the edge.", "Rise onto your toes as high as possible, pause briefly.", "Lower until you feel a stretch in your calves.", "Don't bounce at the bottom."],
+    "walking lunge": ["Step forward, lowering until both knees near 90°.", "Keep your front knee tracking over your ankle, not past your toes.", "Push through your front heel to step into the next lunge.", "Keep your torso upright throughout."],
+    "treadmill jog": ["Start at a light, conversational pace.", "Land midfoot rather than heel-striking.", "Keep shoulders relaxed, arms swinging naturally.", "This is a warm-up — keep it easy, not a workout in itself."],
+    "band pull-aparts": ["Hold the band with arms extended in front, shoulder-width grip.", "Pull the band apart by squeezing your shoulder blades together.", "Keep your arms straight throughout.", "Return with control — don't let the band snap back."],
+    "bodyweight squats": ["Feet shoulder-width, toes slightly turned out.", "Push your hips back and bend your knees to lower.", "Go until thighs are roughly parallel to the floor.", "Drive through your heels back to standing, chest up."],
+    "cat-cow stretch": ["Hands and knees, wrists under shoulders, knees under hips.", "Inhale — drop your belly, lift head and tailbone (cow).", "Exhale — round your spine, tuck your chin (cat).", "Move slowly and continuously between the two."],
+    "medicine ball russian twist": ["Sit with knees bent, lean back slightly, feet on the floor.", "Hold the ball at your chest.", "Rotate side to side, tapping the ball near the floor each side.", "Keep your core braced throughout — move from your torso, not your arms."],
+    "medicine ball slam": ["Hold the ball overhead, feet shoulder-width apart.", "Hinge at the hips and slam the ball down as hard as you can.", "Let your knees bend to absorb the motion.", "Pick the ball back up (or catch the bounce) and reset."],
+    "cable row": ["Seated, feet on the platform, arms extended to the handle.", "Pull the handle to your torso, squeezing your shoulder blades.", "Keep your back straight — don't round to reach the finish.", "Return with control to full arm extension."],
+    "treadmill walk": ["Set a brisk but sustainable pace.", "Keep your posture upright — don't hold onto the rails.", "Swing your arms naturally.", "Adjust incline/speed rather than leaning on the machine for support."],
+    "standing hamstring stretch": ["Extend one leg forward, heel down, toes up.", "Hinge at the hips, keeping your back straight.", "Stop when you feel a stretch in the back of the extended leg — don't force it.", "Hold, then switch sides."],
+    "child's pose": ["Kneel with big toes touching, knees wide.", "Sit back onto your heels.", "Reach your arms forward, lowering your chest toward the floor.", "Breathe deeply and let your lower back relax."],
+    "chest/shoulder doorway stretch": ["Place your forearm on a doorframe, elbow at shoulder height.", "Step forward through the doorway until you feel a stretch.", "Keep your torso upright — don't overextend your lower back.", "Hold, then switch sides."]
+  };
+
+  function renderMuscleDiagram(muscleGroup) {
+    const on = "var(--accent)", off = "var(--border)";
+    const outline = muscleGroup === "Back" ? `stroke="${on}" stroke-width="3"` : "";
+    const fill = (cond) => cond ? on : off;
+    return `<svg viewBox="0 0 120 200" width="100" height="167" style="display:block;margin:0 auto;">
+        <circle cx="60" cy="18" r="14" fill="${off}"/>
+        <circle cx="40" cy="42" r="9" fill="${fill(muscleGroup === "Shoulders")}"/>
+        <circle cx="80" cy="42" r="9" fill="${fill(muscleGroup === "Shoulders")}"/>
+        <rect x="40" y="38" width="40" height="34" rx="6" fill="${fill(muscleGroup === "Chest")}" ${outline}/>
+        <rect x="42" y="74" width="36" height="34" rx="6" fill="${fill(muscleGroup === "Core")}" ${outline}/>
+        <rect x="18" y="42" width="14" height="60" rx="6" fill="${fill(muscleGroup === "Arms")}"/>
+        <rect x="88" y="42" width="14" height="60" rx="6" fill="${fill(muscleGroup === "Arms")}"/>
+        <rect x="44" y="110" width="14" height="70" rx="6" fill="${fill(muscleGroup === "Legs")}"/>
+        <rect x="62" y="110" width="14" height="70" rx="6" fill="${fill(muscleGroup === "Legs")}"/>
+      </svg>
+      <div style="text-align:center;color:var(--text-muted);font-size:11px;margin-top:4px;">${escapeHtml(muscleGroup)}${muscleGroup === "Back" ? " (outlined — upper back/lats)" : ""}</div>`;
+  }
+
+  function openExerciseGuideModal(exId) {
+    const ex = library.find(e => e.id === exId);
+    if (!ex) return;
+    const guide = EXERCISE_GUIDES[ex.name.trim().toLowerCase()];
+    const root = document.getElementById("wt-modal-root");
+    root.innerHTML = `
+      <div class="wt-modal-backdrop" id="wt-guide-backdrop">
+        <div class="wt-modal">
+          <h2>${escapeHtml(ex.name)}</h2>
+          ${renderMuscleDiagram(ex.muscleGroup || "Other")}
+          <div class="wt-settings-title" style="margin-top:16px;">How To</div>
+          ${guide ? `<ol style="margin:8px 0 0;padding-left:20px;color:var(--text);font-size:14px;line-height:1.6;">
+            ${guide.map(s => `<li>${escapeHtml(s)}</li>`).join("")}
+          </ol>` : `<div class="wt-settings-sub">No built-in guide for this one yet.</div>`}
+          <div class="wt-form" style="margin-top:16px;">
+            <div>
+              <label>Video Tutorial URL (optional — you add this)</label>
+              <input type="text" id="wt-guide-video" value="${escapeHtml(ex.videoUrl || "")}" placeholder="https://youtube.com/...">
+            </div>
+          </div>
+          ${ex.videoUrl ? `<a href="${escapeHtml(ex.videoUrl)}" target="_blank" rel="noopener" class="wt-btn wt-btn-ghost wt-btn-block" style="margin-top:10px;text-decoration:none;text-align:center;display:block;box-sizing:border-box;">▶ Open Video</a>` : ""}
+          <div class="wt-modal-actions">
+            <button class="wt-btn wt-btn-ghost" id="wt-guide-close">Close</button>
+            <button class="wt-btn wt-btn-primary" id="wt-guide-save">Save Video Link</button>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById("wt-guide-backdrop").addEventListener("click", (e) => {
+      if (e.target.id === "wt-guide-backdrop") closeModal();
+    });
+    document.getElementById("wt-guide-close").addEventListener("click", closeModal);
+    document.getElementById("wt-guide-save").addEventListener("click", async () => {
+      ex.videoUrl = document.getElementById("wt-guide-video").value.trim();
+      await saveLibrary();
+      showToast("Video link saved");
+      closeModal();
+      render();
+    });
+  }
+
   function groupLibraryForDisplay(list) {
     const groups = {};
     list.forEach(e => {
@@ -1344,6 +1431,7 @@
                 <div class="wt-lib-meta">${ex.mode === "cardio" ? `${ex.sets} × ${ex.durationMin}min/${ex.distanceMi}mi` : `${ex.sets} × ${ex.reps}${ex.usesWeight ? " @ " + ex.weight + " lb" : ""}`} · rest ${ex.restSets}s/${ex.restNext}s</div>
               </div>
               <div class="wt-lib-actions">
+                <button class="wt-iconbtn" data-guide="${ex.id}" title="How to / video">📖</button>
                 <button class="wt-iconbtn" data-edit="${ex.id}">✎</button>
                 <button class="wt-iconbtn" data-del="${ex.id}">✕</button>
               </div>
@@ -1354,6 +1442,7 @@
     }
     $view.innerHTML = html;
     document.getElementById("wt-ai-open-btn").addEventListener("click", openAiTrainerModal);
+    document.querySelectorAll("[data-guide]").forEach(b => b.addEventListener("click", () => openExerciseGuideModal(b.dataset.guide)));
     document.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openExerciseModal(b.dataset.edit)));
     document.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => deleteExercise(b.dataset.del)));
 
