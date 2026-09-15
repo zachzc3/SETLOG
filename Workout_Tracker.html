@@ -600,6 +600,22 @@
     { name: "Chest/Shoulder Doorway Stretch", muscleGroup: "Chest", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 1, distanceMi: 0, restSets: 0, restNext: 0 }
   ];
 
+  const RECOMMENDED_TEMPLATES = [
+    { name: "Warm-up A", exerciseNames: ["Treadmill Jog", "Band Pull-Aparts"] },
+    { name: "Warm-up B", exerciseNames: ["Bodyweight Squats", "Cat-Cow Stretch"] },
+    { name: "Warm-up C", exerciseNames: ["Treadmill Jog", "Cat-Cow Stretch"] },
+    { name: "Push A", exerciseNames: ["Chest Press (Multi Press)", "Incline DB Press", "Cable Shoulder Press", "Cable Lateral Raise", "Cable Triceps Pushdown"] },
+    { name: "Pull A", exerciseNames: ["Lat Pulldown", "Vertical Row", "Cable Row", "One-Arm DB Row", "Cable / DB Curl"] },
+    { name: "Legs A", exerciseNames: ["Leg Press", "Leg Extension", "Leg Curl", "Calf Raise", "Walking Lunge"] },
+    { name: "Cardio + Core", exerciseNames: ["Treadmill Walk", "Medicine Ball Russian Twist", "Medicine Ball Slam"] },
+    { name: "Push B", exerciseNames: ["Incline DB Press", "Chest Press (Multi Press)", "Cable Lateral Raise", "Cable Shoulder Press", "Cable Triceps Pushdown"] },
+    { name: "Pull B", exerciseNames: ["Vertical Row", "Cable Row", "Lat Pulldown", "Cable / DB Curl", "Cable Face Pull"] },
+    { name: "Legs B", exerciseNames: ["Leg Press", "Leg Curl", "Calf Raise", "Walking Lunge", "Medicine Ball Russian Twist"] },
+    { name: "Cool-down A", exerciseNames: ["Standing Hamstring Stretch", "Child's Pose"] },
+    { name: "Cool-down B", exerciseNames: ["Chest/Shoulder Doorway Stretch", "Child's Pose"] },
+    { name: "Cool-down C (Full)", exerciseNames: ["Standing Hamstring Stretch", "Chest/Shoulder Doorway Stretch", "Child's Pose"] }
+  ];
+
   function groupLibraryForDisplay(list) {
     const groups = {};
     list.forEach(e => {
@@ -2005,6 +2021,12 @@
       </div>
 
       <div class="wt-settings-card">
+        <div class="wt-settings-title">Create Starter Templates</div>
+        <div class="wt-settings-sub">Builds 13 templates in one tap: Warm-up A/B/C, Push/Pull/Legs A/B, Cardio + Core, and Cool-down A/B/C (Full). Matches exercises by name from your library — add the Starter Set above first, or it'll skip whatever it can't find and tell you what's missing.</div>
+        <button class="wt-btn wt-btn-primary wt-btn-sm" id="wt-seed-templates-btn">Create Starter Templates</button>
+      </div>
+
+      <div class="wt-settings-card">
         <div class="wt-settings-title">Normalize to 3×10</div>
         <div class="wt-settings-sub">Sets every exercise in your library to 3 sets of 10 reps in one tap. Doesn't touch weight, rest times, day, or muscle group — just sets/reps.</div>
         <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-normalize-btn">Set All to 3×10</button>
@@ -2080,6 +2102,29 @@
       });
       await saveLibrary();
       showToast(added ? `Added ${added} exercise${added === 1 ? "" : "s"}` : "You already have all of these");
+      render();
+    });
+
+    document.getElementById("wt-seed-templates-btn").addEventListener("click", async () => {
+      const existingTplNames = new Set(templates.map(t => t.name.trim().toLowerCase()));
+      let added = 0;
+      const missingNames = new Set();
+      RECOMMENDED_TEMPLATES.forEach(t => {
+        if (existingTplNames.has(t.name.trim().toLowerCase())) return;
+        const exerciseIds = [];
+        t.exerciseNames.forEach(n => {
+          const match = library.find(e => e.name.trim().toLowerCase() === n.trim().toLowerCase());
+          if (match) exerciseIds.push(match.id); else missingNames.add(n);
+        });
+        if (exerciseIds.length) { templates.push({ id: uid(), name: t.name, exerciseIds }); added++; }
+      });
+      await saveTemplates();
+      if (missingNames.size) {
+        const list = Array.from(missingNames).slice(0, 3).join(", ") + (missingNames.size > 3 ? "…" : "");
+        showToast(`Added ${added} template${added === 1 ? "" : "s"} — missing exercises: ${list}`);
+      } else {
+        showToast(added ? `Added ${added} template${added === 1 ? "" : "s"}` : "You already have all of these");
+      }
       render();
     });
 
