@@ -1805,6 +1805,8 @@
   }
 
   // ---------- HISTORY VIEW ----------
+  let expandedHistoryIds = new Set();
+
   function renderHistory() {
     if (!sessions.length) {
       $view.innerHTML = `<div class="wt-empty"><div class="wt-empty-title">No workouts logged yet</div>Finish a session and it'll show up here.</div>`;
@@ -1814,27 +1816,39 @@
     sessions.forEach(s => {
       const d = new Date(s.date);
       const stats = sessionStats(s);
-      const parts = [`${s.exercises.length} exercises`, `${stats.totalSets} sets`];
+      const parts = [];
       if (stats.totalWeight > 0) parts.push(`${stats.totalWeight.toLocaleString()} lb moved`);
       if (stats.cardioMi > 0) parts.push(`${stats.cardioMi.toFixed(1)} mi cardio`);
       else if (stats.cardioMin > 0) parts.push(`${stats.cardioMin} cardio min`);
       if (stats.durationMin) parts.push(`${stats.durationMin} min`);
-      html += `<div class="wt-hist-card">
-        <div class="wt-hist-date">${fmtDate(d)}</div>
+      if (!parts.length) parts.push(`${s.exercises.length} exercise${s.exercises.length === 1 ? "" : "s"}`);
+      const isOpen = expandedHistoryIds.has(s.id);
+      html += `<div class="wt-hist-card" data-hist-toggle="${s.id}" style="cursor:pointer;">
+        <div class="wt-hist-date">${isOpen ? "▾" : "▸"} ${fmtDate(d)}</div>
         <div class="wt-hist-sub">${parts.join(" · ")}</div>`;
-      s.exercises.forEach(e => {
-        const loggedSets = e.sets.filter(x => x.done);
-        if (!loggedSets.length) return;
-        html += `<div class="wt-hist-ex">
-          <div class="wt-hist-ex-name">${escapeHtml(e.name)}</div>
-          <div class="wt-hist-set">${e.mode === "cardio"
-            ? loggedSets.map(x => `${x.durationMin}min / ${x.distanceMi}mi`).join(" · ")
-            : loggedSets.map(x => (x.isWarmup ? "W: " : "") + (e.usesWeight ? `${x.reps}×${x.weight}lb` : `${x.reps} reps`) + (x.isPR ? " 🏆" : "")).join(" · ")}</div>
-        </div>`;
-      });
+      if (isOpen) {
+        s.exercises.forEach(e => {
+          const loggedSets = e.sets.filter(x => x.done);
+          if (!loggedSets.length) return;
+          html += `<div class="wt-hist-ex">
+            <div class="wt-hist-ex-name">${escapeHtml(e.name)}</div>
+            <div class="wt-hist-set">${e.mode === "cardio"
+              ? loggedSets.map(x => `${x.durationMin}min / ${x.distanceMi}mi`).join(" · ")
+              : loggedSets.map(x => (x.isWarmup ? "W: " : "") + (e.usesWeight ? `${x.reps}×${x.weight}lb` : `${x.reps} reps`) + (x.isPR ? " 🏆" : "")).join(" · ")}</div>
+          </div>`;
+        });
+      }
       html += `</div>`;
     });
     $view.innerHTML = html;
+    document.querySelectorAll("[data-hist-toggle]").forEach(card => {
+      card.addEventListener("click", () => {
+        const id = card.dataset.histToggle;
+        if (expandedHistoryIds.has(id)) expandedHistoryIds.delete(id);
+        else expandedHistoryIds.add(id);
+        render();
+      });
+    });
   }
 
   // ---------- PROGRESS VIEW ----------
