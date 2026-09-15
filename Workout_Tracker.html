@@ -1,0 +1,2021 @@
+<style>
+  :root {
+    --bg: #0B0E14;
+    --surface: #151A24;
+    --surface-2: #1D2330;
+    --border: #2A3140;
+    --text: #ECEEF2;
+    --text-muted: #8A93A6;
+    --accent: #F2A93B;
+    --accent-dim: #7A5A20;
+    --good: #4ADE80;
+    --danger: #E8604A;
+    --info: #4A90E2;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  #wt-root {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .wt-topbar {
+    padding: 22px 20px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .wt-topbar h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+  .wt-topbar .wt-sub {
+    color: var(--text-muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: 2px;
+  }
+  .wt-elapsed {
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 800;
+    margin-top: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wt-main {
+    flex: 1;
+    padding: 16px 16px 96px;
+    overflow-y: auto;
+  }
+
+  .wt-bottomnav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    gap: 4px;
+    z-index: 40;
+  }
+  .wt-navbtn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 10px 4px 8px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .wt-navbtn.active { color: var(--accent); background: var(--surface-2); }
+
+  .wt-btn {
+    font-family: var(--font);
+    border: none;
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .wt-btn-primary { background: var(--accent); color: #1A1200; }
+  .wt-btn-primary:active { background: #d99427; }
+  .wt-btn-ghost { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+  .wt-btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+  .wt-btn-block { width: 100%; }
+  .wt-btn-sm { padding: 8px 12px; font-size: 13px; border-radius: 9px; }
+
+  .wt-empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 60px 20px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .wt-empty .wt-empty-title {
+    color: var(--text);
+    font-weight: 800;
+    font-size: 17px;
+    margin-bottom: 8px;
+  }
+
+  .wt-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .wt-card.wt-done { opacity: 0.55; }
+  .wt-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .wt-ex-name { font-weight: 800; font-size: 16px; }
+  .wt-ex-target { color: var(--text-muted); font-size: 12px; margin-top: 2px; letter-spacing: 0.02em; }
+
+  .wt-setrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .wt-setnum {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .wt-setrow.wt-set-done .wt-setnum { background: var(--good); color: #0B2917; }
+  .wt-setrow.wt-set-warmup {
+    border: 1.5px solid var(--info);
+    border-radius: 10px;
+    padding: 8px;
+  }
+  .wt-setrow.wt-set-warmup .wt-setnum { background: var(--info); color: #0B1E33; }
+  .wt-setrow.wt-set-warmup.wt-set-done .wt-setnum { background: var(--good); color: #0B2917; }
+  .wt-iconbtn-active { background: var(--accent); color: #1A1200; border-color: var(--accent); }
+  .wt-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .wt-field label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+  .wt-field input {
+    font-family: var(--font);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 700;
+    padding: 8px 10px;
+    width: 100%;
+  }
+  .wt-field input:disabled { opacity: 0.5; }
+  .wt-logbtn {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent);
+    color: #1A1200;
+    font-weight: 900;
+    font-size: 18px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .wt-logbtn:disabled { background: var(--good); color: #0B2917; }
+
+  .wt-addex-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .wt-addex-row select {
+    flex: 1;
+    font-family: var(--font);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .wt-finishbar { margin-top: 8px; }
+
+  /* Exercises tab */
+  .wt-lib-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .wt-lib-head { display: flex; justify-content: space-between; align-items: center; }
+  .wt-lib-name { font-weight: 800; font-size: 15px; }
+  .wt-lib-meta { color: var(--text-muted); font-size: 12px; margin-top: 3px; }
+  .wt-lib-actions { display: flex; gap: 6px; }
+  .wt-iconbtn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .wt-form { display: flex; flex-direction: column; gap: 10px; }
+  .wt-form label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+    display: block;
+  }
+  .wt-form input, .wt-form select {
+    font-family: var(--font);
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--text);
+    font-size: 15px;
+    padding: 10px 12px;
+  }
+  .wt-form-row { display: flex; gap: 10px; }
+  .wt-form-row > div { flex: 1; }
+  .wt-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 10px 12px;
+  }
+  .wt-switch {
+    width: 40px; height: 22px;
+    border-radius: 20px;
+    background: var(--border);
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .wt-switch.on { background: var(--accent); }
+  .wt-switch::after {
+    content: "";
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: left 0.15s;
+  }
+  .wt-switch.on::after { left: 20px; }
+
+  .wt-fab {
+    position: fixed;
+    bottom: 84px;
+    left: 50%;
+    transform: translateX(148px);
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #1A1200;
+    border: none;
+    font-size: 26px;
+    font-weight: 900;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    cursor: pointer;
+    z-index: 41;
+  }
+  @media (max-width: 480px) {
+    .wt-fab { transform: none; right: 16px; left: auto; }
+  }
+
+  .wt-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 60;
+    display: flex;
+    align-items: flex-end;
+  }
+  .wt-modal {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 18px calc(24px + env(safe-area-inset-bottom));
+    width: 100%;
+    max-height: 88vh;
+    overflow-y: auto;
+    color: var(--text);
+  }
+  .wt-modal h2 { margin: 0 0 14px; font-size: 18px; font-weight: 800; }
+  .wt-modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+  .wt-modal-actions .wt-btn { flex: 1; }
+
+  /* History tab */
+  .wt-hist-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .wt-hist-date { font-weight: 800; font-size: 14px; }
+  .wt-hist-sub { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+  .wt-hist-ex { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 13px; }
+  .wt-hist-ex-name { font-weight: 700; margin-bottom: 3px; }
+  .wt-hist-set { color: var(--text-muted); }
+
+  /* Inline rest timer */
+  .wt-inline-timer {
+    background: var(--surface-2);
+    border: 1px solid var(--accent-dim);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin: 10px 0 0;
+  }
+  .wt-inline-timer-label {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .wt-inline-timer-count {
+    font-size: 34px;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+  }
+  .wt-inline-timer-next {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin: 4px 0 10px;
+  }
+  .wt-inline-timer-row, .wt-inline-timer-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .wt-inline-timer-secs {
+    width: 66px;
+    font-family: var(--font);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 700;
+    padding: 8px 10px;
+    text-align: center;
+  }
+
+  /* Settings tab */
+  .wt-settings-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .wt-settings-title { font-weight: 800; font-size: 14px; margin-bottom: 4px; }
+  .wt-settings-sub { color: var(--text-muted); font-size: 12px; margin-bottom: 12px; line-height: 1.5; }
+  .wt-settings-row { display: flex; gap: 8px; }
+  .wt-textarea {
+    width: 100%;
+    min-height: 110px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 9px;
+    padding: 10px;
+    resize: vertical;
+  }
+  .wt-toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--good);
+    color: #0B2917;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    z-index: 90;
+    max-width: 480px;
+  }
+
+  .wt-daybadge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    background: rgba(242,169,59,0.12);
+    border: 1px solid var(--accent-dim);
+    border-radius: 6px;
+    padding: 2px 6px;
+    margin-left: 6px;
+  }
+
+  .wt-ai-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #2A3140, #1D2330);
+    border: 1px solid var(--accent-dim);
+    color: var(--accent);
+    font-family: var(--font);
+    font-weight: 800;
+    font-size: 14px;
+    padding: 13px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    cursor: pointer;
+  }
+  .wt-spinner {
+    width: 28px; height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: wt-spin 0.8s linear infinite;
+    margin: 20px auto;
+  }
+  @keyframes wt-spin { to { transform: rotate(360deg); } }
+  .wt-ai-preview-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .wt-ai-preview-item:last-child { border-bottom: none; }
+  .wt-ai-preview-item input[type=checkbox] { width: 20px; height: 20px; flex-shrink: 0; }
+  .wt-ai-preview-name { font-weight: 700; font-size: 14px; }
+  .wt-ai-preview-meta { color: var(--text-muted); font-size: 12px; }
+  .wt-error-box {
+    background: rgba(232,96,74,0.1);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    border-radius: 9px;
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+
+  .wt-hidden { display: none !important; }
+</style>
+
+<div id="wt-root">
+  <div class="wt-topbar">
+    <h1>Session</h1>
+    <div class="wt-sub" id="wt-datestr"></div>
+    <div class="wt-elapsed" id="wt-elapsed-timer"></div>
+  </div>
+  <div class="wt-main" id="wt-view"></div>
+  <nav class="wt-bottomnav">
+    <button class="wt-navbtn" data-view="workout">Workout</button>
+    <button class="wt-navbtn" data-view="exercises">Exercises</button>
+    <button class="wt-navbtn" data-view="history">History</button>
+    <button class="wt-navbtn" data-view="progress">Progress</button>
+    <button class="wt-navbtn" data-view="settings">Settings</button>
+  </nav>
+</div>
+
+<div id="wt-modal-root"></div>
+
+<script>
+(function () {
+  // Standalone-hosting shim: window.storage only exists inside the Claude artifact runtime.
+  // Outside it (e.g. GitHub Pages), fall back to localStorage behind the same async interface
+  // so nothing else in this file needs to know or care which environment it's running in.
+  if (!window.storage) {
+    window.storage = {
+      get: async (key) => {
+        const v = localStorage.getItem(key);
+        return v === null ? null : { value: v };
+      },
+      set: async (key, value) => { localStorage.setItem(key, value); },
+      delete: async (key) => { localStorage.removeItem(key); }
+    };
+  }
+
+  const MUSCLE_GROUPS = ["Chest", "Back", "Shoulders", "Arms", "Legs", "Core", "Cardio", "Other"];
+
+  const DEFAULT_LIBRARY = [
+    { id: "chest-press", name: "Chest Press (Multi Press)", muscleGroup: "Chest", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 90, restNext: 60 },
+    { id: "cable-shoulder-press", name: "Cable Shoulder Press", muscleGroup: "Shoulders", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 75, restNext: 60 },
+    { id: "incline-db-press", name: "Incline DB Press", muscleGroup: "Chest", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 75, restNext: 60 },
+    { id: "cable-lateral-raise", name: "Cable Lateral Raise", muscleGroup: "Shoulders", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 60, restNext: 45 },
+    { id: "triceps-pushdown", name: "Cable Triceps Pushdown", muscleGroup: "Arms", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 60, restNext: 60 },
+    { id: "vertical-row", name: "Vertical Row", muscleGroup: "Back", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 90, restNext: 60 },
+    { id: "lat-pulldown", name: "Lat Pulldown", muscleGroup: "Back", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 75, restNext: 60 },
+    { id: "face-pull", name: "Cable Face Pull", muscleGroup: "Shoulders", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 60, restNext: 45 },
+    { id: "db-row", name: "One-Arm DB Row", muscleGroup: "Back", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 75, restNext: 60 },
+    { id: "curl", name: "Cable / DB Curl", muscleGroup: "Arms", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 60, restNext: 60 },
+    { id: "leg-press", name: "Leg Press", muscleGroup: "Legs", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 120, restNext: 75 },
+    { id: "leg-extension", name: "Leg Extension", muscleGroup: "Legs", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 60, restNext: 60 },
+    { id: "leg-curl", name: "Leg Curl", muscleGroup: "Legs", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 60, restNext: 60 },
+    { id: "calf-raise", name: "Calf Raise", muscleGroup: "Legs", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 45, restNext: 45 },
+    { id: "walking-lunge", name: "Walking Lunge", muscleGroup: "Legs", usesWeight: true, sets: 3, reps: 10, weight: 0, restSets: 75, restNext: 60 }
+  ];
+
+  function groupLibraryForDisplay(list) {
+    const groups = {};
+    list.forEach(e => {
+      const g = e.muscleGroup && MUSCLE_GROUPS.includes(e.muscleGroup) ? e.muscleGroup : "Other";
+      (groups[g] = groups[g] || []).push(e);
+    });
+    const names = Object.keys(groups).filter(g => g !== "Other").sort();
+    if (groups["Other"]) names.push("Other");
+    return names.map(group => ({
+      group,
+      exercises: groups[group].slice().sort((a, b) => a.name.localeCompare(b.name))
+    }));
+  }
+
+  let library = [];
+  let sessions = [];
+  let templates = [];
+  let active = null; // in-progress session
+  let profile = null; // { name }
+  let currentView = "workout";
+  let editingExerciseId = null; // for edit modal
+  let lastBarWeight = 45; // remembered across plate calculator opens
+
+  const $view = document.getElementById("wt-view");
+  const $datestr = document.getElementById("wt-datestr");
+
+  function fmtDate(d) {
+    return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  }
+  function fmtTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return m + ":" + String(s).padStart(2, "0");
+  }
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  // ---------- storage ----------
+  async function loadAll() {
+    try {
+      const lib = await window.storage.get("exercise-library");
+      library = lib ? JSON.parse(lib.value) : DEFAULT_LIBRARY.slice();
+    } catch (e) { library = DEFAULT_LIBRARY.slice(); }
+
+    try {
+      const s = await window.storage.get("workout-sessions");
+      sessions = s ? JSON.parse(s.value) : [];
+    } catch (e) { sessions = []; }
+
+    try {
+      const t = await window.storage.get("workout-templates");
+      templates = t ? JSON.parse(t.value) : [];
+    } catch (e) { templates = []; }
+
+    try {
+      const a = await window.storage.get("active-session");
+      active = a ? JSON.parse(a.value) : null;
+    } catch (e) { active = null; }
+
+    try {
+      const p = await window.storage.get("profile");
+      profile = p ? JSON.parse(p.value) : null;
+    } catch (e) { profile = null; }
+  }
+
+  async function saveLibrary() {
+    try { await window.storage.set("exercise-library", JSON.stringify(library)); }
+    catch (e) { console.error("save library failed", e); showToast("⚠ Save failed — see Settings"); }
+  }
+  async function saveSessions() {
+    try { await window.storage.set("workout-sessions", JSON.stringify(sessions)); }
+    catch (e) { console.error("save sessions failed", e); showToast("⚠ Save failed — see Settings"); }
+  }
+  async function saveTemplates() {
+    try { await window.storage.set("workout-templates", JSON.stringify(templates)); }
+    catch (e) { console.error("save templates failed", e); showToast("⚠ Save failed — see Settings"); }
+  }
+  async function saveActive() {
+    try {
+      if (active) await window.storage.set("active-session", JSON.stringify(active));
+      else await window.storage.delete("active-session");
+    } catch (e) { console.error("save active failed", e); showToast("⚠ Save failed — see Settings"); }
+  }
+  async function saveProfile() {
+    try { await window.storage.set("profile", JSON.stringify(profile)); }
+    catch (e) { console.error("save profile failed", e); showToast("⚠ Save failed — see Settings"); }
+  }
+
+  function showToast(msg) {
+    const t = document.createElement("div");
+    t.className = "wt-toast";
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1800);
+  }
+
+  // ---------- rendering shell ----------
+  function setNav() {
+    document.querySelectorAll(".wt-navbtn").forEach(b => {
+      b.classList.toggle("active", b.dataset.view === currentView);
+    });
+    const titles = { workout: "Session", exercises: "Exercises", history: "History", progress: "Progress", settings: "Settings" };
+    document.querySelector(".wt-topbar h1").textContent = titles[currentView];
+    if (currentView === "settings") {
+      $datestr.textContent = profile && profile.name ? profile.name + "'s tracker" : "";
+    } else {
+      $datestr.textContent = currentView === "workout" && active
+        ? fmtDate(new Date(active.date))
+        : fmtDate(new Date());
+    }
+  }
+
+  function render() {
+    setNav();
+    if (currentView === "workout") renderWorkout();
+    else if (currentView === "exercises") renderExercises();
+    else if (currentView === "history") renderHistory();
+    else if (currentView === "progress") renderProgress();
+    else renderSettings();
+    document.getElementById("wt-fab")?.classList.toggle("wt-hidden", currentView !== "exercises");
+  }
+
+  document.querySelectorAll(".wt-navbtn").forEach(b => {
+    b.addEventListener("click", () => { currentView = b.dataset.view; render(); });
+  });
+
+  // ---------- WORKOUT VIEW ----------
+  function renderWorkout() {
+    if (!active) {
+      let html = `
+        <div class="wt-empty">
+          <div class="wt-empty-title">No workout in progress</div>
+          Start one, add exercises from your library, and log sets as you go. Rest timers fire automatically.
+        </div>
+        <button class="wt-btn wt-btn-primary wt-btn-block" id="wt-start-btn">Start Empty Workout</button>
+      `;
+      if (templates.length) {
+        html += `<div class="wt-settings-title" style="margin:22px 0 8px;">Templates</div>`;
+        templates.forEach(t => {
+          html += `<div class="wt-lib-card">
+            <div class="wt-lib-head">
+              <div>
+                <div class="wt-lib-name">${escapeHtml(t.name)}</div>
+                <div class="wt-lib-meta">${t.exerciseIds.length} exercise${t.exerciseIds.length === 1 ? "" : "s"}</div>
+              </div>
+              <div class="wt-lib-actions">
+                <button class="wt-btn wt-btn-primary wt-btn-sm" data-start-tpl="${t.id}">Start</button>
+                <button class="wt-iconbtn" data-edit-tpl="${t.id}">✎</button>
+                <button class="wt-iconbtn" data-del-tpl="${t.id}">✕</button>
+              </div>
+            </div>
+          </div>`;
+        });
+      }
+      html += `<button class="wt-btn wt-btn-ghost wt-btn-block" id="wt-new-tpl-btn" style="margin-top:8px;">+ New Template</button>`;
+      $view.innerHTML = html;
+      document.getElementById("wt-start-btn").addEventListener("click", startWorkout);
+      document.getElementById("wt-new-tpl-btn").addEventListener("click", () => openTemplateModal(null));
+      document.querySelectorAll("[data-start-tpl]").forEach(b => {
+        b.addEventListener("click", () => startWorkoutFromTemplate(b.dataset.startTpl));
+      });
+      document.querySelectorAll("[data-edit-tpl]").forEach(b => {
+        b.addEventListener("click", () => {
+          const tpl = templates.find(t => t.id === b.dataset.editTpl);
+          if (tpl) openTemplateModal(tpl);
+        });
+      });
+      document.querySelectorAll("[data-del-tpl]").forEach(b => {
+        b.addEventListener("click", () => {
+          templates = templates.filter(t => t.id !== b.dataset.delTpl);
+          saveTemplates(); render();
+        });
+      });
+      return;
+    }
+
+    const usedIds = new Set(active.exercises.map(e => e.libId));
+    const available = library.filter(e => !usedIds.has(e.id));
+
+    let html = `<div class="wt-addex-row">
+      <select id="wt-add-select">
+        <option value="">${available.length ? "Add exercise…" : "All exercises added"}</option>
+        ${groupLibraryForDisplay(available).map(({ group, exercises }) => `
+          <optgroup label="${escapeHtml(group)}">
+            ${exercises.map(e => `<option value="${e.id}">${escapeHtml(e.name)}</option>`).join("")}
+          </optgroup>
+        `).join("")}
+      </select>
+    </div>`;
+
+    active.exercises.forEach((ex, exIdx) => {
+      const allDone = ex.sets.every(s => s.done);
+      html += `<div class="wt-card ${allDone ? "wt-done" : ""}">
+        <div class="wt-card-head">
+          <div>
+            <div class="wt-ex-name">${escapeHtml(ex.name)}</div>
+            <div class="wt-ex-target">${ex.sets.filter(s => !s.isWarmup).length} sets · target ${ex.mode === "cardio" ? `${ex.targetDurationMin}min/${ex.targetDistanceMi}mi` : `${ex.targetReps} reps${ex.usesWeight ? " · " + ex.targetWeight + " lb" : ""}`} · rest ${ex.restSets}s/${ex.restNext}s</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+            <button class="wt-iconbtn" data-move-ex="${exIdx}:-1" ${exIdx === 0 ? "disabled" : ""} title="Move up">▲</button>
+            <button class="wt-iconbtn" data-move-ex="${exIdx}:1" ${exIdx === active.exercises.length - 1 ? "disabled" : ""} title="Move down">▼</button>
+            <button class="wt-iconbtn" data-edit-session-ex="${exIdx}" title="Edit rest times">✎</button>
+            ${ex.mode !== "cardio" && ex.usesWeight ? `<button class="wt-iconbtn" data-plate-ex="${exIdx}" title="Plate calculator">🏋</button>` : ""}
+            ${ex.mode !== "cardio" ? `<button class="wt-iconbtn ${ex.sets.some(s => s.isWarmup) ? "wt-iconbtn-active" : ""}" data-toggle-warmup="${exIdx}" title="Toggle warm-up set">W</button>` : ""}
+            <button class="wt-iconbtn" data-remove-ex="${exIdx}">✕</button>
+          </div>
+        </div>`;
+
+      let workingSetNum = 0;
+      ex.sets.forEach((s, setIdx) => {
+        const isNext = !s.done && ex.sets.slice(0, setIdx).every(p => p.done);
+        if (!s.isWarmup) workingSetNum++;
+        html += `<div class="wt-setrow ${s.done ? "wt-set-done" : ""} ${s.isWarmup ? "wt-set-warmup" : ""}">
+          <div class="wt-setnum">${s.done ? (s.isPR ? "🏆" : "✓") : (s.isWarmup ? "W" : workingSetNum)}</div>
+          ${ex.mode === "cardio" ? `
+          <div class="wt-field">
+            <label>Min</label>
+            <input type="number" inputmode="decimal" data-ex="${exIdx}" data-set="${setIdx}" data-field="durationMin"
+              value="${s.durationMin}" ${s.done ? "disabled" : ""}>
+          </div>
+          <div class="wt-field">
+            <label>Miles</label>
+            <input type="number" inputmode="decimal" step="0.01" data-ex="${exIdx}" data-set="${setIdx}" data-field="distanceMi"
+              value="${s.distanceMi}" ${s.done ? "disabled" : ""}>
+          </div>` : `
+          <div class="wt-field">
+            <label>Reps</label>
+            <input type="number" inputmode="numeric" data-ex="${exIdx}" data-set="${setIdx}" data-field="reps"
+              value="${s.reps}" ${s.done ? "disabled" : ""}>
+          </div>
+          ${ex.usesWeight ? `<div class="wt-field">
+            <label>Lbs</label>
+            <input type="number" inputmode="decimal" data-ex="${exIdx}" data-set="${setIdx}" data-field="weight"
+              value="${s.weight}" ${s.done ? "disabled" : ""}>
+          </div>` : ""}`}
+          <button class="wt-logbtn" data-log="${exIdx}:${setIdx}" ${s.done || !isNext ? "disabled" : ""}>${s.done ? "✓" : "OK"}</button>
+          ${!s.done ? `<button class="wt-iconbtn" data-remove-set="${exIdx}:${setIdx}" title="Remove set">✕</button>` : ""}
+        </div>`;
+        if (restState && restState.exIdx === exIdx && restState.afterSetIdx === setIdx) {
+          html += renderInlineTimer();
+        }
+      });
+      html += `<button class="wt-btn wt-btn-ghost wt-btn-sm" data-add-set="${exIdx}" style="margin-top:10px;">+ Add Set</button>`;
+      html += `</div>`;
+    });
+
+    if (active.exercises.length) {
+      html += `<div class="wt-finishbar" style="display:flex;gap:10px;">
+        <button class="wt-btn wt-btn-ghost" id="wt-save-tpl-btn" style="flex:1;">Save as Template</button>
+        <button class="wt-btn wt-btn-danger" id="wt-finish-btn" style="flex:1;">Finish Workout</button>
+      </div>`;
+    }
+
+    $view.innerHTML = html;
+
+    document.getElementById("wt-add-select")?.addEventListener("change", (e) => {
+      if (e.target.value) addExerciseToSession(e.target.value);
+    });
+    document.getElementById("wt-save-tpl-btn")?.addEventListener("click", () => {
+      openTemplateModal({ id: null, name: "", exerciseIds: active.exercises.map(e => e.libId) });
+    });
+    document.querySelectorAll("[data-plate-ex]").forEach(b => {
+      b.addEventListener("click", () => {
+        const ex = active.exercises[parseInt(b.dataset.plateEx)];
+        openPlateCalcModal(ex.targetWeight || 0);
+      });
+    });
+    document.querySelectorAll("[data-remove-ex]").forEach(b => {
+      b.addEventListener("click", () => {
+        active.exercises.splice(parseInt(b.dataset.removeEx), 1);
+        saveActive(); render();
+      });
+    });
+    document.querySelectorAll("[data-move-ex]").forEach(b => {
+      b.addEventListener("click", () => {
+        const [exIdx, dir] = b.dataset.moveEx.split(":").map(Number);
+        moveExercise(exIdx, dir);
+      });
+    });
+    document.querySelectorAll("[data-edit-session-ex]").forEach(b => {
+      b.addEventListener("click", () => openSessionExerciseEditModal(parseInt(b.dataset.editSessionEx)));
+    });
+    document.querySelectorAll("[data-add-set]").forEach(b => {
+      b.addEventListener("click", () => addSetToExercise(parseInt(b.dataset.addSet)));
+    });
+    document.querySelectorAll("[data-toggle-warmup]").forEach(b => {
+      b.addEventListener("click", () => toggleWarmupSet(parseInt(b.dataset.toggleWarmup)));
+    });
+    document.querySelectorAll("[data-remove-set]").forEach(b => {
+      b.addEventListener("click", () => {
+        const [exIdx, setIdx] = b.dataset.removeSet.split(":").map(Number);
+        removeSetFromExercise(exIdx, setIdx);
+      });
+    });
+    document.querySelectorAll("input[data-ex]").forEach(inp => {
+      inp.addEventListener("input", () => {
+        const exIdx = parseInt(inp.dataset.ex), setIdx = parseInt(inp.dataset.set), field = inp.dataset.field;
+        const ex = active.exercises[exIdx];
+        const oldVal = ex.sets[setIdx][field];
+        const newVal = parseFloat(inp.value) || 0;
+        ex.sets[setIdx][field] = newVal;
+        // Auto-fill forward: later not-yet-logged sets that still match the old value follow along.
+        // The moment a later set has its own different value, it's considered manually set and stops following.
+        for (let j = setIdx + 1; j < ex.sets.length; j++) {
+          if (ex.sets[j].done) continue;
+          if (ex.sets[j][field] !== oldVal) break;
+          ex.sets[j][field] = newVal;
+          const sib = document.querySelector(`input[data-ex="${exIdx}"][data-set="${j}"][data-field="${field}"]`);
+          if (sib) sib.value = newVal;
+        }
+      });
+    });
+    document.querySelectorAll("[data-log]").forEach(b => {
+      b.addEventListener("click", () => {
+        const [exIdx, setIdx] = b.dataset.log.split(":").map(Number);
+        logSet(exIdx, setIdx);
+      });
+    });
+    document.getElementById("wt-finish-btn")?.addEventListener("click", finishWorkout);
+
+    document.getElementById("wt-inline-timer-start")?.addEventListener("click", startRest);
+    document.getElementById("wt-inline-timer-skip")?.addEventListener("click", finishRest);
+    document.getElementById("wt-inline-timer-add15")?.addEventListener("click", () => addRestSeconds(15));
+    document.getElementById("wt-inline-timer-secs")?.addEventListener("input", (e) => {
+      if (!restState) return;
+      const v = parseInt(e.target.value) || 0;
+      restState.remaining = v;
+      restState.totalSeconds = v;
+    });
+  }
+
+  // ---------- ELAPSED SESSION TIMER (top of screen, runs across all tabs) ----------
+  let elapsedInterval = null;
+  function startElapsedTimer() {
+    clearInterval(elapsedInterval);
+    function tick() {
+      const el = document.getElementById("wt-elapsed-timer");
+      if (!active) { if (el) el.textContent = ""; clearInterval(elapsedInterval); return; }
+      const secs = Math.max(0, Math.floor((Date.now() - new Date(active.date)) / 1000));
+      const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
+      const txt = h > 0 ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`;
+      if (el) el.textContent = "⏱ " + txt;
+    }
+    tick();
+    elapsedInterval = setInterval(tick, 1000);
+  }
+  function stopElapsedTimer() {
+    clearInterval(elapsedInterval);
+    const el = document.getElementById("wt-elapsed-timer");
+    if (el) el.textContent = "";
+  }
+
+  function startWorkout() {
+    active = { id: uid(), date: new Date().toISOString(), exercises: [] };
+    saveActive(); render();
+    startElapsedTimer();
+  }
+
+  function getLastPerformance(libId, name) {
+    // sessions is newest-first, so the first match is the most recent time this was done
+    for (const s of sessions) {
+      const ex = s.exercises.find(e => (e.libId === libId || e.name === name) && e.sets.some(x => x.done && !x.isWarmup));
+      if (ex) return ex.sets.filter(x => x.done && !x.isWarmup);
+    }
+    return null;
+  }
+
+  function buildSessionExercise(lib) {
+    const last = getLastPerformance(lib.id, lib.name);
+    if (lib.mode === "cardio") {
+      const sets = [];
+      for (let i = 0; i < lib.sets; i++) {
+        const prev = last && last[i] && last[i].durationMin != null ? last[i] : null;
+        sets.push({ durationMin: prev ? prev.durationMin : lib.durationMin, distanceMi: prev ? prev.distanceMi : lib.distanceMi, done: false });
+      }
+      return {
+        libId: lib.id, name: lib.name, mode: "cardio",
+        targetDurationMin: lib.durationMin, targetDistanceMi: lib.distanceMi,
+        restSets: lib.restSets, restNext: lib.restNext,
+        sets
+      };
+    }
+    const sets = [];
+    for (let i = 0; i < lib.sets; i++) {
+      const prev = last && last[i];
+      sets.push({ reps: prev ? prev.reps : lib.reps, weight: prev ? prev.weight : lib.weight, done: false });
+    }
+    return {
+      libId: lib.id, name: lib.name, usesWeight: lib.usesWeight,
+      targetReps: lib.reps, targetWeight: lib.weight,
+      restSets: lib.restSets, restNext: lib.restNext,
+      sets
+    };
+  }
+
+  function addExerciseToSession(libId) {
+    const lib = library.find(e => e.id === libId);
+    if (!lib) return;
+    active.exercises.push(buildSessionExercise(lib));
+    saveActive(); render();
+  }
+
+  function moveExercise(exIdx, dir) {
+    const newIdx = exIdx + dir;
+    if (newIdx < 0 || newIdx >= active.exercises.length) return;
+    const [item] = active.exercises.splice(exIdx, 1);
+    active.exercises.splice(newIdx, 0, item);
+    saveActive(); render();
+  }
+
+  function addSetToExercise(exIdx) {
+    const ex = active.exercises[exIdx];
+    const last = ex.sets[ex.sets.length - 1];
+    if (ex.mode === "cardio") {
+      ex.sets.push({ durationMin: last ? last.durationMin : ex.targetDurationMin, distanceMi: last ? last.distanceMi : ex.targetDistanceMi, done: false });
+    } else {
+      ex.sets.push({ reps: last ? last.reps : ex.targetReps, weight: last ? last.weight : ex.targetWeight, done: false });
+    }
+    saveActive(); render();
+  }
+
+  function removeSetFromExercise(exIdx, setIdx) {
+    const ex = active.exercises[exIdx];
+    if (ex.sets.length <= 1) { showToast("An exercise needs at least one set — remove the exercise instead"); return; }
+    ex.sets.splice(setIdx, 1);
+    saveActive(); render();
+  }
+
+  function toggleWarmupSet(exIdx) {
+    const ex = active.exercises[exIdx];
+    const warmupIdx = ex.sets.findIndex(s => s.isWarmup);
+    if (warmupIdx > -1) {
+      if (ex.sets[warmupIdx].done) { showToast("Warm-up set already logged — remove it manually if you need to"); return; }
+      ex.sets.splice(warmupIdx, 1);
+    } else {
+      const warmupWeight = ex.usesWeight ? Math.round(((ex.targetWeight || 0) * 0.5) / 5) * 5 : 0;
+      ex.sets.unshift({ reps: ex.targetReps, weight: warmupWeight, done: false, isWarmup: true });
+    }
+    saveActive(); render();
+  }
+
+  function openSessionExerciseEditModal(exIdx) {
+    const ex = active.exercises[exIdx];
+    const root = document.getElementById("wt-modal-root");
+    root.innerHTML = `
+      <div class="wt-modal-backdrop" id="wt-sessex-backdrop">
+        <div class="wt-modal">
+          <h2>${escapeHtml(ex.name)}</h2>
+          <div class="wt-settings-sub" style="margin-bottom:10px;">Applies to this exercise for the rest of today's session.</div>
+          <div class="wt-form-row">
+            <div>
+              <label>Rest between sets (sec)</label>
+              <input type="number" id="wt-sessex-restsets" value="${ex.restSets}">
+            </div>
+            <div>
+              <label>Rest before next exercise (sec)</label>
+              <input type="number" id="wt-sessex-restnext" value="${ex.restNext}">
+            </div>
+          </div>
+          <div class="wt-modal-actions">
+            <button class="wt-btn wt-btn-ghost" id="wt-sessex-cancel">Cancel</button>
+            <button class="wt-btn wt-btn-primary" id="wt-sessex-save">Save</button>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById("wt-sessex-backdrop").addEventListener("click", (e) => {
+      if (e.target.id === "wt-sessex-backdrop") closeModal();
+    });
+    document.getElementById("wt-sessex-cancel").addEventListener("click", closeModal);
+    document.getElementById("wt-sessex-save").addEventListener("click", () => {
+      ex.restSets = parseInt(document.getElementById("wt-sessex-restsets").value) || 0;
+      ex.restNext = parseInt(document.getElementById("wt-sessex-restnext").value) || 0;
+      saveActive();
+      closeModal();
+      showToast("Rest times updated");
+      render();
+    });
+  }
+
+  function startWorkoutFromTemplate(tplId) {
+    const tpl = templates.find(t => t.id === tplId);
+    if (!tpl) return;
+    active = { id: uid(), date: new Date().toISOString(), exercises: [] };
+    tpl.exerciseIds.forEach(libId => {
+      const lib = library.find(e => e.id === libId);
+      if (lib) active.exercises.push(buildSessionExercise(lib));
+    });
+    saveActive(); render();
+    startElapsedTimer();
+  }
+
+  function bestValueForExercise(name, usesWeight, excludeExIdx, excludeSetIdx) {
+    let best = 0;
+    function scan(exList, isActive) {
+      exList.forEach((e, exI) => {
+        if (e.name !== name) return;
+        e.sets.forEach((s, setI) => {
+          if (isActive && exI === excludeExIdx && setI === excludeSetIdx) return;
+          if (!s.done || s.isWarmup) return;
+          const val = usesWeight ? (s.weight || 0) : (s.reps || 0);
+          if (val > best) best = val;
+        });
+      });
+    }
+    sessions.forEach(s => scan(s.exercises, false));
+    if (active) scan(active.exercises, true);
+    return best;
+  }
+
+  function logSet(exIdx, setIdx) {
+    const ex = active.exercises[exIdx];
+    const set = ex.sets[setIdx];
+    let isPR = false, newVal = 0;
+    if (ex.mode !== "cardio" && !set.isWarmup) {
+      const priorBest = bestValueForExercise(ex.name, ex.usesWeight, exIdx, setIdx);
+      newVal = ex.usesWeight ? (set.weight || 0) : (set.reps || 0);
+      isPR = newVal > 0 && newVal > priorBest;
+    }
+    set.done = true;
+    if (isPR) set.isPR = true;
+    saveActive();
+    if (isPR) showToast(`🏆 New PR — ${ex.usesWeight ? newVal + " lb" : newVal + " reps"} on ${ex.name}`);
+
+    const isLastSet = setIdx === ex.sets.length - 1;
+    const hasIncompleteAfter = active.exercises.slice(exIdx + 1).some(e => e.sets.some(s => !s.done));
+    const hasMoreSetsThisEx = ex.sets.some(s => !s.done);
+
+    clearInterval(restInterval);
+    if (hasMoreSetsThisEx && ex.restSets > 0) {
+      restState = {
+        exIdx, afterSetIdx: setIdx, kind: "between",
+        totalSeconds: ex.restSets, remaining: ex.restSets, running: false,
+        nextLabel: `Next: ${ex.name}, set ${ex.sets.findIndex(s => !s.done) + 1}`
+      };
+    } else if (isLastSet && hasIncompleteAfter && ex.restNext > 0) {
+      const nextEx = active.exercises.slice(exIdx + 1).find(e => e.sets.some(s => !s.done));
+      restState = {
+        exIdx, afterSetIdx: setIdx, kind: "next-exercise",
+        totalSeconds: ex.restNext, remaining: ex.restNext, running: false,
+        nextLabel: nextEx ? `Next: ${nextEx.name}` : ""
+      };
+    } else {
+      restState = null;
+    }
+    render();
+  }
+
+  async function finishWorkout() {
+    const hasLogged = active.exercises.some(e => e.sets.some(s => s.done));
+    if (hasLogged) {
+      active.finishedAt = new Date().toISOString();
+      sessions.unshift(active);
+      await saveSessions();
+    }
+    active = null;
+    await saveActive();
+    stopElapsedTimer();
+    render();
+  }
+
+  function sessionStats(s) {
+    let totalWeight = 0, totalSets = 0, cardioMin = 0, cardioMi = 0;
+    s.exercises.forEach(e => {
+      e.sets.forEach(set => {
+        if (!set.done || set.isWarmup) return;
+        if (e.mode === "cardio") {
+          cardioMin += set.durationMin || 0;
+          cardioMi += set.distanceMi || 0;
+        } else {
+          totalSets++;
+          if (e.usesWeight) totalWeight += (set.reps || 0) * (set.weight || 0);
+          else if (profile && profile.bodyweight) totalWeight += (set.reps || 0) * profile.bodyweight;
+        }
+      });
+    });
+    let durationMin = null;
+    if (s.finishedAt) {
+      durationMin = Math.max(1, Math.round((new Date(s.finishedAt) - new Date(s.date)) / 60000));
+    }
+    return { totalWeight, totalSets, durationMin, cardioMin, cardioMi };
+  }
+
+  // ---------- REST TIMER (inline) ----------
+  let restState = null; // { exIdx, afterSetIdx, kind, totalSeconds, remaining, running, endTime, nextLabel }
+  let restInterval = null;
+
+  function renderInlineTimer() {
+    if (!restState) return "";
+    const label = restState.kind === "between" ? "REST BETWEEN SETS" : "REST BEFORE NEXT EXERCISE";
+    if (!restState.running) {
+      return `<div class="wt-inline-timer">
+        <div class="wt-inline-timer-label">${label}</div>
+        <div class="wt-inline-timer-row">
+          <input type="number" id="wt-inline-timer-secs" class="wt-inline-timer-secs" value="${restState.remaining}">
+          <span style="color:var(--text-muted);font-size:12px;">sec</span>
+          <button class="wt-btn wt-btn-primary wt-btn-sm" id="wt-inline-timer-start">Start</button>
+          <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-inline-timer-skip">Skip</button>
+        </div>
+        ${restState.nextLabel ? `<div class="wt-inline-timer-next">${escapeHtml(restState.nextLabel)}</div>` : ""}
+      </div>`;
+    }
+    return `<div class="wt-inline-timer">
+      <div class="wt-inline-timer-label">${label}</div>
+      <div class="wt-inline-timer-count" id="wt-inline-timer-num">${fmtTime(restState.remaining)}</div>
+      ${restState.nextLabel ? `<div class="wt-inline-timer-next">${escapeHtml(restState.nextLabel)}</div>` : ""}
+      <div class="wt-inline-timer-actions">
+        <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-inline-timer-add15">+15s</button>
+        <button class="wt-btn wt-btn-primary wt-btn-sm" id="wt-inline-timer-skip">Skip</button>
+      </div>
+    </div>`;
+  }
+
+  function startRest() {
+    if (!restState) return;
+    restState.running = true;
+    restState.endTime = Date.now() + restState.remaining * 1000;
+    render();
+    clearInterval(restInterval);
+    restInterval = setInterval(() => {
+      if (!restState || !restState.running) { clearInterval(restInterval); return; }
+      const remaining = Math.max(0, Math.round((restState.endTime - Date.now()) / 1000));
+      restState.remaining = remaining;
+      const numEl = document.getElementById("wt-inline-timer-num");
+      if (numEl) numEl.textContent = fmtTime(remaining);
+      if (remaining <= 0) {
+        clearInterval(restInterval);
+        beep();
+        if (navigator.vibrate) navigator.vibrate([200, 80, 200]);
+        finishRest();
+      }
+    }, 250);
+  }
+
+  function addRestSeconds(sec) {
+    if (!restState) return;
+    restState.remaining += sec;
+    if (restState.running) restState.endTime += sec * 1000;
+    render();
+  }
+
+  function finishRest() {
+    clearInterval(restInterval);
+    restState = null;
+    render();
+  }
+
+  function beep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.value = 880;
+      g.gain.setValueAtTime(0.001, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      o.connect(g); g.connect(ctx.destination);
+      o.start();
+      o.stop(ctx.currentTime + 0.45);
+    } catch (e) {}
+  }
+
+  // ---------- EXERCISES VIEW ----------
+  function renderExercises() {
+    let html = `<button class="wt-ai-btn" id="wt-ai-open-btn">✨ Generate Routine with AI</button>`;
+    if (!library.length) {
+      html += `<div class="wt-empty"><div class="wt-empty-title">No exercises yet</div>Tap + to add one manually, or generate a routine with AI above.</div>`;
+    } else {
+      groupLibraryForDisplay(library).forEach(({ group, exercises }) => {
+        html += `<div class="wt-settings-title" style="margin:18px 0 8px;">${escapeHtml(group)}</div>`;
+        exercises.forEach(ex => {
+          html += `<div class="wt-lib-card">
+            <div class="wt-lib-head">
+              <div>
+                <div class="wt-lib-name">${escapeHtml(ex.name)}${ex.day ? `<span class="wt-daybadge">${escapeHtml(ex.day)}</span>` : ""}</div>
+                <div class="wt-lib-meta">${ex.mode === "cardio" ? `${ex.sets} × ${ex.durationMin}min/${ex.distanceMi}mi` : `${ex.sets} × ${ex.reps}${ex.usesWeight ? " @ " + ex.weight + " lb" : ""}`} · rest ${ex.restSets}s/${ex.restNext}s</div>
+              </div>
+              <div class="wt-lib-actions">
+                <button class="wt-iconbtn" data-edit="${ex.id}">✎</button>
+                <button class="wt-iconbtn" data-del="${ex.id}">✕</button>
+              </div>
+            </div>
+          </div>`;
+        });
+      });
+    }
+    $view.innerHTML = html;
+    document.getElementById("wt-ai-open-btn").addEventListener("click", openAiTrainerModal);
+    document.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openExerciseModal(b.dataset.edit)));
+    document.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => deleteExercise(b.dataset.del)));
+
+    if (!document.getElementById("wt-fab")) {
+      const fab = document.createElement("button");
+      fab.id = "wt-fab";
+      fab.className = "wt-fab";
+      fab.textContent = "+";
+      fab.addEventListener("click", () => openExerciseModal(null));
+      document.body.appendChild(fab);
+    }
+    document.getElementById("wt-fab").classList.toggle("wt-hidden", currentView !== "exercises");
+  }
+
+  function deleteExercise(id) {
+    library = library.filter(e => e.id !== id);
+    saveLibrary(); render();
+  }
+
+  function openExerciseModal(id) {
+    editingExerciseId = id;
+    const ex = id ? library.find(e => e.id === id) : {
+      name: "", usesWeight: true, sets: 3, reps: 10, weight: 0, durationMin: 20, distanceMi: 1,
+      restSets: 75, restNext: 60, day: "", muscleGroup: "Other", mode: "strength"
+    };
+    const mode = ex.mode || "strength";
+    const dayOptions = ["", "Push", "Pull", "Legs", "Cardio"];
+    const root = document.getElementById("wt-modal-root");
+    root.innerHTML = `
+      <div class="wt-modal-backdrop" id="wt-modal-backdrop">
+        <div class="wt-modal">
+          <h2>${id ? "Edit Exercise" : "New Exercise"}</h2>
+          <div class="wt-form">
+            <div>
+              <label>Name</label>
+              <input type="text" id="wt-f-name" value="${escapeHtml(ex.name)}" placeholder="e.g. Leg Press">
+            </div>
+            <div class="wt-form-row">
+              <div>
+                <label>Day (optional)</label>
+                <select id="wt-f-day">
+                  ${dayOptions.map(d => `<option value="${d}" ${ex.day === d ? "selected" : ""}>${d || "Any"}</option>`).join("")}
+                </select>
+              </div>
+              <div>
+                <label>Muscle Group</label>
+                <select id="wt-f-musclegroup">
+                  ${MUSCLE_GROUPS.map(g => `<option value="${g}" ${(ex.muscleGroup || "Other") === g ? "selected" : ""}>${g}</option>`).join("")}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label>Type</label>
+              <select id="wt-f-mode">
+                <option value="strength" ${mode === "strength" ? "selected" : ""}>Strength (sets/reps/weight)</option>
+                <option value="cardio" ${mode === "cardio" ? "selected" : ""}>Cardio (time/distance)</option>
+              </select>
+            </div>
+            <div class="wt-toggle-row ${mode === "cardio" ? "wt-hidden" : ""}" id="wt-f-usesweight-row">
+              <span>Uses weight</span>
+              <div class="wt-switch ${ex.usesWeight ? "on" : ""}" id="wt-f-usesweight"></div>
+            </div>
+            <div class="wt-form-row">
+              <div>
+                <label>Sets</label>
+                <input type="number" id="wt-f-sets" value="${ex.sets}">
+              </div>
+              <div id="wt-f-reps-wrap" class="${mode === "cardio" ? "wt-hidden" : ""}">
+                <label>Reps</label>
+                <input type="number" id="wt-f-reps" value="${ex.reps || 10}">
+              </div>
+              <div id="wt-f-weight-wrap" class="${mode === "cardio" ? "wt-hidden" : ""}">
+                <label>Weight (lb)</label>
+                <input type="number" id="wt-f-weight" value="${ex.weight || 0}">
+              </div>
+              <div id="wt-f-duration-wrap" class="${mode === "strength" ? "wt-hidden" : ""}">
+                <label>Duration (min)</label>
+                <input type="number" id="wt-f-duration" value="${ex.durationMin || 20}">
+              </div>
+              <div id="wt-f-distance-wrap" class="${mode === "strength" ? "wt-hidden" : ""}">
+                <label>Distance (mi)</label>
+                <input type="number" step="0.1" id="wt-f-distance" value="${ex.distanceMi || 1}">
+              </div>
+            </div>
+            <div class="wt-form-row">
+              <div>
+                <label>Rest between sets (sec)</label>
+                <input type="number" id="wt-f-restsets" value="${ex.restSets}">
+              </div>
+              <div>
+                <label>Rest before next exercise (sec)</label>
+                <input type="number" id="wt-f-restnext" value="${ex.restNext}">
+              </div>
+            </div>
+          </div>
+          <div class="wt-modal-actions">
+            <button class="wt-btn wt-btn-ghost" id="wt-modal-cancel">Cancel</button>
+            <button class="wt-btn wt-btn-primary" id="wt-modal-save">Save</button>
+          </div>
+        </div>
+      </div>`;
+
+    const sw = document.getElementById("wt-f-usesweight");
+    sw.addEventListener("click", () => sw.classList.toggle("on"));
+
+    document.getElementById("wt-f-mode").addEventListener("change", (e) => {
+      const isCardio = e.target.value === "cardio";
+      document.getElementById("wt-f-usesweight-row").classList.toggle("wt-hidden", isCardio);
+      document.getElementById("wt-f-reps-wrap").classList.toggle("wt-hidden", isCardio);
+      document.getElementById("wt-f-weight-wrap").classList.toggle("wt-hidden", isCardio);
+      document.getElementById("wt-f-duration-wrap").classList.toggle("wt-hidden", !isCardio);
+      document.getElementById("wt-f-distance-wrap").classList.toggle("wt-hidden", !isCardio);
+    });
+
+    document.getElementById("wt-modal-backdrop").addEventListener("click", (e) => {
+      if (e.target.id === "wt-modal-backdrop") closeModal();
+    });
+    document.getElementById("wt-modal-cancel").addEventListener("click", closeModal);
+    document.getElementById("wt-modal-save").addEventListener("click", () => {
+      const nameInput = document.getElementById("wt-f-name");
+      const name = nameInput.value.trim();
+      if (!name) {
+        showToast("⚠ Give the exercise a name first");
+        nameInput.focus();
+        return;
+      }
+      const exMode = document.getElementById("wt-f-mode").value;
+      const base = {
+        id: id || uid(),
+        name,
+        day: document.getElementById("wt-f-day").value,
+        muscleGroup: document.getElementById("wt-f-musclegroup").value,
+        mode: exMode,
+        sets: parseInt(document.getElementById("wt-f-sets").value) || 1,
+        restSets: parseInt(document.getElementById("wt-f-restsets").value) || 0,
+        restNext: parseInt(document.getElementById("wt-f-restnext").value) || 0
+      };
+      const newEx = exMode === "cardio"
+        ? { ...base, usesWeight: false,
+            durationMin: parseFloat(document.getElementById("wt-f-duration").value) || 0,
+            distanceMi: parseFloat(document.getElementById("wt-f-distance").value) || 0 }
+        : { ...base, usesWeight: sw.classList.contains("on"),
+            reps: parseInt(document.getElementById("wt-f-reps").value) || 1,
+            weight: parseFloat(document.getElementById("wt-f-weight").value) || 0 };
+      if (id) {
+        const idx = library.findIndex(e => e.id === id);
+        library[idx] = newEx;
+      } else {
+        library.push(newEx);
+      }
+      saveLibrary();
+      closeModal();
+      render();
+    });
+  }
+
+  // ---------- AI PERSONAL TRAINER ----------
+  function openAiTrainerModal() {
+    const root = document.getElementById("wt-modal-root");
+    root.innerHTML = `
+      <div class="wt-modal-backdrop" id="wt-ai-backdrop">
+        <div class="wt-modal">
+          <h2>✨ AI Personal Trainer</h2>
+          <div class="wt-settings-sub" style="margin-bottom:12px;">Tell it what you've got, and it'll design a routine using your equipment.</div>
+          <div class="wt-form">
+            <div>
+              <label>Available equipment</label>
+              <textarea class="wt-textarea" id="wt-ai-equipment" style="min-height:80px;font-family:var(--font);font-size:14px;">Nautilus Instinct Dual Adjustable, Nautilus Vertical Row/Lat Pulldown, Nautilus Dual Leg Press/Calf Raise, Nautilus Leg Extension/Curl, Nautilus Multi Press, Nautilus Bench, Stairmaster, treadmills, free dumbbells, medicine balls, weighted vest</textarea>
+            </div>
+            <div class="wt-form-row">
+              <div>
+                <label>Goal</label>
+                <select id="wt-ai-goal">
+                  <option value="body recomposition (fat loss + muscle gain)" selected>Recomp</option>
+                  <option value="building muscle">Build Muscle</option>
+                  <option value="losing fat">Lose Fat</option>
+                  <option value="general maintenance">Maintain</option>
+                </select>
+              </div>
+              <div>
+                <label>Days/week</label>
+                <select id="wt-ai-days">
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6" selected>6</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div id="wt-ai-result"></div>
+          <div class="wt-modal-actions">
+            <button class="wt-btn wt-btn-ghost" id="wt-ai-cancel">Cancel</button>
+            <button class="wt-btn wt-btn-primary" id="wt-ai-generate">Generate</button>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById("wt-ai-backdrop").addEventListener("click", (e) => {
+      if (e.target.id === "wt-ai-backdrop") closeModal();
+    });
+    document.getElementById("wt-ai-cancel").addEventListener("click", closeModal);
+    document.getElementById("wt-ai-generate").addEventListener("click", runAiTrainer);
+  }
+
+  async function runAiTrainer() {
+    const equipment = document.getElementById("wt-ai-equipment").value.trim();
+    const goal = document.getElementById("wt-ai-goal").value;
+    const days = document.getElementById("wt-ai-days").value;
+    const resultBox = document.getElementById("wt-ai-result");
+    const genBtn = document.getElementById("wt-ai-generate");
+    if (!equipment) return;
+
+    genBtn.disabled = true;
+    resultBox.innerHTML = `<div class="wt-spinner"></div><div style="text-align:center;color:var(--text-muted);font-size:13px;">Designing your routine…</div>`;
+
+    const prompt = `You are a strength coach. Equipment available: ${equipment}. Goal: ${goal}. Training ${days} days per week using a sensible split for that frequency (e.g. push/pull/legs, upper/lower, or full body depending on frequency). Respond with ONLY minified JSON, no markdown fences, no commentary, in exactly this shape: {"exercises":[{"name":"Exercise Name","day":"Push","usesWeight":true,"sets":4,"reps":10,"restSets":75,"restNext":60}]}. "day" must be one of Push, Pull, Legs, Cardio, Any. Include 12-16 exercises total covering the full split, using only the equipment listed. Keep it compact.`;
+
+    try {
+      const headers = { "Content-Type": "application/json" };
+      // Inside the Claude artifact runtime, no key is needed — the platform injects auth invisibly.
+      // Running standalone (e.g. GitHub Pages), a key saved in Settings is required for this to work.
+      if (profile && profile.anthropicKey) {
+        headers["x-api-key"] = profile.anthropicKey;
+        headers["anthropic-dangerous-direct-browser-access"] = "true";
+      }
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 1000,
+          messages: [{ role: "user", content: prompt }]
+        })
+      });
+      if (!response.ok) throw new Error("Request failed (" + response.status + ")");
+      const data = await response.json();
+      const text = (data.content || [])
+        .filter(b => b.type === "text")
+        .map(b => b.text)
+        .join("\n")
+        .replace(/```json|```/g, "")
+        .trim();
+      const parsed = JSON.parse(text);
+      const exercises = Array.isArray(parsed.exercises) ? parsed.exercises : [];
+      if (!exercises.length) throw new Error("No exercises came back — try again");
+      renderAiPreview(exercises);
+    } catch (e) {
+      resultBox.innerHTML = `<div class="wt-error-box">Couldn't generate a routine: ${escapeHtml(e.message || "unknown error")}. Try again, or adjust your equipment list.</div>`;
+    } finally {
+      genBtn.disabled = false;
+    }
+  }
+
+  function renderAiPreview(exercises) {
+    const resultBox = document.getElementById("wt-ai-result");
+    let html = `<div class="wt-settings-sub" style="margin:12px 0 4px;">Review, then add what you want to your library:</div>`;
+    exercises.forEach((ex, i) => {
+      html += `<label class="wt-ai-preview-item">
+        <input type="checkbox" data-ai-idx="${i}" checked>
+        <div>
+          <div class="wt-ai-preview-name">${escapeHtml(ex.name || "Exercise")}${ex.day ? `<span class="wt-daybadge">${escapeHtml(ex.day)}</span>` : ""}</div>
+          <div class="wt-ai-preview-meta">${ex.sets || "?"} × ${ex.reps || "?"}${ex.usesWeight === false ? "" : " (weighted)"} · rest ${ex.restSets || 60}s/${ex.restNext || 60}s</div>
+        </div>
+      </label>`;
+    });
+    html += `<button class="wt-btn wt-btn-primary wt-btn-block" id="wt-ai-add-btn" style="margin-top:14px;">Add Selected to Library</button>`;
+    resultBox.innerHTML = html;
+    document.getElementById("wt-ai-add-btn").addEventListener("click", () => {
+      const existingNames = new Set(library.map(e => e.name.toLowerCase()));
+      let added = 0;
+      exercises.forEach((ex, i) => {
+        const cb = document.querySelector(`[data-ai-idx="${i}"]`);
+        if (!cb || !cb.checked) return;
+        if (existingNames.has((ex.name || "").toLowerCase())) return;
+        library.push({
+          id: uid(),
+          name: ex.name || "Exercise",
+          day: ["Push", "Pull", "Legs", "Cardio"].includes(ex.day) ? ex.day : "",
+          mode: "strength",
+          usesWeight: ex.usesWeight !== false,
+          sets: parseInt(ex.sets) || 3,
+          reps: parseInt(ex.reps) || 10,
+          weight: 0,
+          restSets: parseInt(ex.restSets) || 75,
+          restNext: parseInt(ex.restNext) || 60
+        });
+        added++;
+      });
+      saveLibrary();
+      closeModal();
+      showToast(added + " exercise" + (added === 1 ? "" : "s") + " added");
+      render();
+    });
+  }
+
+  function closeModal() {
+    document.getElementById("wt-modal-root").innerHTML = "";
+    editingExerciseId = null;
+  }
+
+  // ---------- TEMPLATES ----------
+  // existing: null for a brand-new template, or { id, name, exerciseIds } to edit/prefill.
+  // If existing.id is set, saving updates that template in place instead of creating a new one.
+  function openTemplateModal(existing) {
+    const tplId = existing && existing.id ? existing.id : null;
+    const prefillName = existing && existing.name ? existing.name : "";
+    const ids = new Set(existing && existing.exerciseIds ? existing.exerciseIds : []);
+    const root = document.getElementById("wt-modal-root");
+    root.innerHTML = `
+      <div class="wt-modal-backdrop" id="wt-tpl-backdrop">
+        <div class="wt-modal">
+          <h2>${tplId ? "Edit Template" : "Save Template"}</h2>
+          <div class="wt-form">
+            <div>
+              <label>Name</label>
+              <input type="text" id="wt-tpl-name" value="${escapeHtml(prefillName)}" placeholder="e.g. Push Day A">
+            </div>
+          </div>
+          <div class="wt-settings-sub" style="margin:12px 0 4px;">Select exercises:</div>
+          <div id="wt-tpl-list">
+            ${library.length ? groupLibraryForDisplay(library).map(({ group, exercises }) => `
+              <div class="wt-settings-title" style="margin:14px 0 4px;">${escapeHtml(group)}</div>
+              ${exercises.map(e => `
+                <label class="wt-ai-preview-item">
+                  <input type="checkbox" data-tpl-ex="${e.id}" ${ids.has(e.id) ? "checked" : ""}>
+                  <div class="wt-ai-preview-name">${escapeHtml(e.name)}</div>
+                </label>
+              `).join("")}
+            `).join("") : `<div class="wt-settings-sub">Add some exercises in the Exercises tab first.</div>`}
+          </div>
+          <div class="wt-modal-actions">
+            <button class="wt-btn wt-btn-ghost" id="wt-tpl-cancel">Cancel</button>
+            <button class="wt-btn wt-btn-primary" id="wt-tpl-save">${tplId ? "Save Changes" : "Save Template"}</button>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById("wt-tpl-backdrop").addEventListener("click", (e) => {
+      if (e.target.id === "wt-tpl-backdrop") closeModal();
+    });
+    document.getElementById("wt-tpl-cancel").addEventListener("click", closeModal);
+    document.getElementById("wt-tpl-save").addEventListener("click", () => {
+      const nameInput = document.getElementById("wt-tpl-name");
+      const name = nameInput.value.trim();
+      if (!name) {
+        showToast("⚠ Give your template a name first");
+        nameInput.focus();
+        return;
+      }
+      const exerciseIds = Array.from(document.querySelectorAll("[data-tpl-ex]:checked")).map(cb => cb.dataset.tplEx);
+      if (!exerciseIds.length) {
+        showToast("⚠ Select at least one exercise");
+        return;
+      }
+      if (tplId) {
+        const idx = templates.findIndex(t => t.id === tplId);
+        if (idx > -1) templates[idx] = { id: tplId, name, exerciseIds };
+      } else {
+        templates.push({ id: uid(), name, exerciseIds });
+      }
+      saveTemplates();
+      closeModal();
+      showToast(tplId ? "Template updated" : "Template saved");
+      render();
+    });
+  }
+
+  // ---------- PLATE CALCULATOR ----------
+  function calcPlates(target, bar) {
+    let perSide = Math.max(0, (target - bar) / 2);
+    const plateSizes = [45, 35, 25, 10, 5, 2.5];
+    const used = [];
+    plateSizes.forEach(p => {
+      while (perSide >= p - 0.001) { used.push(p); perSide -= p; }
+    });
+    return { used, remainder: perSide };
+  }
+
+  function openPlateCalcModal(prefillTarget) {
+    const root = document.getElementById("wt-modal-root");
+    root.innerHTML = `
+      <div class="wt-modal-backdrop" id="wt-plate-backdrop">
+        <div class="wt-modal">
+          <h2>🏋 Plate Calculator</h2>
+          <div class="wt-form-row">
+            <div>
+              <label>Bar weight (lb)</label>
+              <input type="number" id="wt-plate-bar" value="${lastBarWeight}">
+            </div>
+            <div>
+              <label>Target weight (lb)</label>
+              <input type="number" id="wt-plate-target" value="${prefillTarget || 0}">
+            </div>
+          </div>
+          <div id="wt-plate-result" style="margin-top:16px;"></div>
+          <div class="wt-modal-actions">
+            <button class="wt-btn wt-btn-ghost wt-btn-block" id="wt-plate-close">Close</button>
+          </div>
+        </div>
+      </div>`;
+    const barInp = document.getElementById("wt-plate-bar");
+    const targetInp = document.getElementById("wt-plate-target");
+    function update() {
+      const bar = parseFloat(barInp.value) || 0;
+      const target = parseFloat(targetInp.value) || 0;
+      lastBarWeight = bar;
+      const resultEl = document.getElementById("wt-plate-result");
+      if (target <= bar) {
+        resultEl.innerHTML = `<div class="wt-settings-sub">Target is at or below the bar — no plates needed.</div>`;
+        return;
+      }
+      const { used, remainder } = calcPlates(target, bar);
+      if (!used.length) {
+        resultEl.innerHTML = `<div class="wt-settings-sub">No plates needed for this weight.</div>`;
+        return;
+      }
+      const total = bar + used.reduce((a, b) => a + b, 0) * 2;
+      resultEl.innerHTML = `
+        <div class="wt-settings-title">Per side</div>
+        <div style="font-size:20px;font-weight:800;margin:6px 0;">${used.join(" · ")} lb</div>
+        <div class="wt-settings-sub">${used.length} plate${used.length === 1 ? "" : "s"} per side + ${bar} lb bar = ${total.toFixed(1)} lb total${remainder > 0.01 ? `<br>⚠ ${remainder.toFixed(1)} lb per side can't be made with standard plates (45/35/25/10/5/2.5)` : ""}</div>
+      `;
+    }
+    barInp.addEventListener("input", update);
+    targetInp.addEventListener("input", update);
+    update();
+    document.getElementById("wt-plate-backdrop").addEventListener("click", (e) => {
+      if (e.target.id === "wt-plate-backdrop") closeModal();
+    });
+    document.getElementById("wt-plate-close").addEventListener("click", closeModal);
+  }
+
+  // ---------- HISTORY VIEW ----------
+  function renderHistory() {
+    if (!sessions.length) {
+      $view.innerHTML = `<div class="wt-empty"><div class="wt-empty-title">No workouts logged yet</div>Finish a session and it'll show up here.</div>`;
+      return;
+    }
+    let html = "";
+    sessions.forEach(s => {
+      const d = new Date(s.date);
+      const stats = sessionStats(s);
+      const parts = [`${s.exercises.length} exercises`, `${stats.totalSets} sets`];
+      if (stats.totalWeight > 0) parts.push(`${stats.totalWeight.toLocaleString()} lb moved`);
+      if (stats.cardioMi > 0) parts.push(`${stats.cardioMi.toFixed(1)} mi cardio`);
+      else if (stats.cardioMin > 0) parts.push(`${stats.cardioMin} cardio min`);
+      if (stats.durationMin) parts.push(`${stats.durationMin} min`);
+      html += `<div class="wt-hist-card">
+        <div class="wt-hist-date">${fmtDate(d)}</div>
+        <div class="wt-hist-sub">${parts.join(" · ")}</div>`;
+      s.exercises.forEach(e => {
+        const loggedSets = e.sets.filter(x => x.done);
+        if (!loggedSets.length) return;
+        html += `<div class="wt-hist-ex">
+          <div class="wt-hist-ex-name">${escapeHtml(e.name)}</div>
+          <div class="wt-hist-set">${e.mode === "cardio"
+            ? loggedSets.map(x => `${x.durationMin}min / ${x.distanceMi}mi`).join(" · ")
+            : loggedSets.map(x => (x.isWarmup ? "W: " : "") + (e.usesWeight ? `${x.reps}×${x.weight}lb` : `${x.reps} reps`) + (x.isPR ? " 🏆" : "")).join(" · ")}</div>
+        </div>`;
+      });
+      html += `</div>`;
+    });
+    $view.innerHTML = html;
+  }
+
+  // ---------- PROGRESS VIEW ----------
+  function svgBarChart(values, labels, opts) {
+    opts = opts || {};
+    const w = 420, h = 140, padL = 34, padB = 20, padT = 10;
+    const max = Math.max(1, ...values);
+    const barW = (w - padL - 10) / values.length;
+    let bars = "";
+    values.forEach((v, i) => {
+      const barH = (v / max) * (h - padT - padB);
+      const x = padL + i * barW + barW * 0.15;
+      const y = h - padB - barH;
+      bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(barW * 0.7).toFixed(1)}" height="${barH.toFixed(1)}" rx="3" fill="${opts.color || '#F2A93B'}"/>`;
+    });
+    const gridLines = [0, 0.5, 1].map(f => {
+      const y = padT + (h - padT - padB) * (1 - f);
+      const val = Math.round(max * f);
+      return `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${w - 6}" y2="${y.toFixed(1)}" stroke="#2A3140" stroke-width="1"/>
+              <text x="2" y="${(y + 3).toFixed(1)}" font-size="9" fill="#8A93A6">${val}</text>`;
+    }).join("");
+    return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}">${gridLines}${bars}</svg>`;
+  }
+
+  function renderProgress() {
+    if (!sessions.length) {
+      $view.innerHTML = `<div class="wt-empty"><div class="wt-empty-title">Nothing to show yet</div>Finish a few workouts and your trends will show up here.</div>`;
+      return;
+    }
+    const recent = sessions.slice(0, 10).slice().reverse(); // oldest to newest, last 10
+    const weights = recent.map(s => sessionStats(s).totalWeight);
+    const durations = recent.map(s => sessionStats(s).durationMin || 0);
+    const dateLabels = recent.map(s => new Date(s.date).toLocaleDateString(undefined, { month: "short", day: "numeric" }));
+
+    const totalAllTime = sessions.reduce((sum, s) => sum + sessionStats(s).totalWeight, 0);
+    const totalCardioMi = sessions.reduce((sum, s) => sum + sessionStats(s).cardioMi, 0);
+    const totalSessions = sessions.length;
+    const avgDuration = Math.round(
+      sessions.map(s => sessionStats(s).durationMin).filter(Boolean).reduce((a, b) => a + b, 0) /
+      Math.max(1, sessions.map(s => sessionStats(s).durationMin).filter(Boolean).length)
+    );
+
+    let html = `
+      <div class="wt-settings-card">
+        <div class="wt-settings-title">All-Time</div>
+        <div class="wt-settings-sub">
+          ${totalAllTime.toLocaleString()} lb total moved · ${totalSessions} workouts logged · avg ${avgDuration || "—"} min/session${totalCardioMi > 0 ? ` · ${totalCardioMi.toFixed(1)} mi cardio` : ""}
+        </div>
+      </div>
+      <div class="wt-settings-card">
+        <div class="wt-settings-title">Weight Moved (Last ${recent.length} Sessions)</div>
+        ${svgBarChart(weights, dateLabels, { color: "#F2A93B" })}
+      </div>
+      <div class="wt-settings-card">
+        <div class="wt-settings-title">Workout Duration, Minutes (Last ${recent.length} Sessions)</div>
+        ${svgBarChart(durations, dateLabels, { color: "#4ADE80" })}
+      </div>
+    `;
+
+    // per-exercise progression: pick top logged exercises
+    const exerciseTotals = {};
+    sessions.forEach(s => s.exercises.forEach(e => {
+      const loggedSets = e.sets.filter(x => x.done);
+      if (!loggedSets.length) return;
+      exerciseTotals[e.name] = (exerciseTotals[e.name] || 0) + loggedSets.length;
+    }));
+    const topExercises = Object.entries(exerciseTotals).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+
+    topExercises.forEach(name => {
+      const points = [];
+      sessions.slice().reverse().forEach(s => {
+        s.exercises.forEach(e => {
+          if (e.name !== name) return;
+          const loggedSets = e.sets.filter(x => x.done);
+          if (!loggedSets.length) return;
+          const topWeight = e.usesWeight ? Math.max(...loggedSets.map(x => x.weight || 0)) : null;
+          points.push(topWeight);
+        });
+      });
+      const trimmed = points.slice(-10);
+      if (trimmed.some(v => v > 0)) {
+        html += `<div class="wt-settings-card">
+          <div class="wt-settings-title">${escapeHtml(name)} — Top Set Weight</div>
+          ${svgBarChart(trimmed, [], { color: "#7DA6F2" })}
+        </div>`;
+      }
+    });
+
+    const prs = allPRs();
+    if (prs.length) {
+      html += `<div class="wt-settings-card">
+        <div class="wt-settings-title">🏆 Personal Records</div>
+        ${prs.map(p => `<div class="wt-hist-sub" style="padding:4px 0;">${escapeHtml(p.name)} — <strong style="color:var(--text);">${p.usesWeight ? p.val + " lb" : p.val + " reps"}</strong></div>`).join("")}
+      </div>`;
+    }
+
+    $view.innerHTML = html;
+  }
+
+  function allPRs() {
+    const map = {};
+    function scan(exList) {
+      exList.forEach(e => {
+        if (e.mode === "cardio") return;
+        e.sets.forEach(s => {
+          if (!s.done || s.isWarmup) return;
+          const val = e.usesWeight ? (s.weight || 0) : (s.reps || 0);
+          if (val <= 0) return;
+          if (!map[e.name] || val > map[e.name].val) map[e.name] = { val, usesWeight: e.usesWeight };
+        });
+      });
+    }
+    sessions.forEach(s => scan(s.exercises));
+    if (active) scan(active.exercises);
+    return Object.entries(map).map(([name, v]) => ({ name, val: v.val, usesWeight: v.usesWeight })).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  // ---------- SETTINGS VIEW ----------
+  function renderSettings() {
+    const exportPayload = JSON.stringify({
+      exportedAt: new Date().toISOString(),
+      library, sessions, templates
+    }, null, 2);
+
+    const libBytes = new Blob([JSON.stringify(library)]).size;
+    const sessBytes = new Blob([JSON.stringify(sessions)]).size;
+    const tplBytes = new Blob([JSON.stringify(templates)]).size;
+    const CAP = 5 * 1024 * 1024;
+    const fmtKB = (b) => (b / 1024).toFixed(1) + " KB";
+    const pct = (b) => Math.max(0.1, (b / CAP * 100)).toFixed(2) + "%";
+
+    $view.innerHTML = `
+      <div class="wt-settings-card">
+        <div class="wt-settings-title">Your name</div>
+        <div class="wt-settings-sub">Shown at the top of the app.</div>
+        <input class="wt-form" id="wt-set-name" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:15px;padding:10px 12px;font-family:var(--font);"
+          value="${escapeHtml(profile && profile.name ? profile.name : "")}" placeholder="e.g. Zach">
+        <button class="wt-btn wt-btn-primary wt-btn-sm" id="wt-set-name-save" style="margin-top:10px;">Save Name</button>
+      </div>
+
+      <div class="wt-settings-card">
+        <div class="wt-settings-title">Body weight (lb)</div>
+        <div class="wt-settings-sub">Used to estimate weight moved on bodyweight exercises (push-ups, etc.) as reps × body weight. Just for that math — not tracked over time.</div>
+        <input id="wt-set-bodyweight" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:15px;padding:10px 12px;font-family:var(--font);"
+          type="number" value="${profile && profile.bodyweight ? profile.bodyweight : ""}" placeholder="e.g. 180">
+        <button class="wt-btn wt-btn-primary wt-btn-sm" id="wt-set-bodyweight-save" style="margin-top:10px;">Save Body Weight</button>
+      </div>
+
+      <div class="wt-settings-card">
+        <div class="wt-settings-title">Storage used</div>
+        <div class="wt-settings-sub">
+          Exercise library: ${fmtKB(libBytes)} of 5 MB limit (${pct(libBytes)})<br>
+          Workout history: ${fmtKB(sessBytes)} of 5 MB limit (${pct(sessBytes)})<br>
+          Templates: ${fmtKB(tplBytes)} of 5 MB limit (${pct(tplBytes)})<br>
+          At this rate you're nowhere close to the cap — years of daily logging typically stays under a few hundred KB.
+        </div>
+      </div>
+
+      <div class="wt-settings-card">
+        <div class="wt-settings-title">Normalize to 3×10</div>
+        <div class="wt-settings-sub">Sets every exercise in your library to 3 sets of 10 reps in one tap. Doesn't touch weight, rest times, day, or muscle group — just sets/reps.</div>
+        <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-normalize-btn">Set All to 3×10</button>
+      </div>
+
+      <div class="wt-settings-card">
+        <div class="wt-settings-title">Anthropic API Key (for standalone hosting only)</div>
+        <div class="wt-settings-sub">Leave blank inside the Claude app — the AI Trainer already works without one here. Only needed if you're running this app from somewhere outside Claude (e.g. GitHub Pages), where there's no built-in key. If you set one, it's stored only in this browser and sent directly from the page — don't share this link or device while a key is saved here.</div>
+        <input id="wt-set-apikey" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:14px;padding:10px 12px;font-family:var(--font);"
+          type="password" value="${profile && profile.anthropicKey ? profile.anthropicKey : ""}" placeholder="sk-ant-...">
+        <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-set-apikey-save" style="margin-top:10px;">Save Key</button>
+      </div>
+
+      <div class="wt-settings-card">
+        <div class="wt-settings-title">Plate Calculator</div>
+        <div class="wt-settings-sub">Figure out what to load on the bar for any target weight.</div>
+        <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-plate-open-btn">Open Calculator</button>
+      </div>
+
+      <div class="wt-settings-card">
+        <div class="wt-settings-title">Back up your data</div>
+        <div class="wt-settings-sub">Copy this text somewhere safe (Notes app, email to yourself). You can paste it back in below to restore.</div>
+        <textarea class="wt-textarea" id="wt-export-box" readonly>${escapeHtml(exportPayload)}</textarea>
+        <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-copy-btn" style="margin-top:10px;">Copy to Clipboard</button>
+      </div>
+
+      <div class="wt-settings-card">
+        <div class="wt-settings-title">Restore from backup</div>
+        <div class="wt-settings-sub">Paste a backup you copied earlier, then tap Restore. This replaces your current exercises and history.</div>
+        <textarea class="wt-textarea" id="wt-import-box" placeholder="Paste backup JSON here"></textarea>
+        <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-import-btn" style="margin-top:10px;">Restore</button>
+      </div>
+
+      <div class="wt-settings-card">
+        <div class="wt-settings-title" style="color:var(--danger);">Reset everything</div>
+        <div class="wt-settings-sub">Deletes your exercises, history, and in-progress workout. Cannot be undone.</div>
+        <button class="wt-btn wt-btn-danger wt-btn-sm" id="wt-reset-btn">Reset All Data</button>
+      </div>
+    `;
+
+    document.getElementById("wt-plate-open-btn").addEventListener("click", () => openPlateCalcModal(0));
+
+    document.getElementById("wt-normalize-btn").addEventListener("click", async () => {
+      if (!library.length) { showToast("No exercises in your library yet"); return; }
+      library.forEach(ex => { ex.sets = 3; ex.reps = 10; });
+      await saveLibrary();
+      showToast("All exercises set to 3×10");
+      render();
+    });
+
+    document.getElementById("wt-set-name-save").addEventListener("click", async () => {
+      const name = document.getElementById("wt-set-name").value.trim();
+      profile = { ...(profile || {}), name };
+      await saveProfile();
+      showToast("Name saved");
+      render();
+    });
+
+    document.getElementById("wt-set-apikey-save").addEventListener("click", async () => {
+      const key = document.getElementById("wt-set-apikey").value.trim();
+      profile = { ...(profile || {}), anthropicKey: key };
+      await saveProfile();
+      showToast(key ? "API key saved" : "API key cleared");
+      render();
+    });
+
+    document.getElementById("wt-set-bodyweight-save").addEventListener("click", async () => {
+      const bw = parseFloat(document.getElementById("wt-set-bodyweight").value) || 0;
+      profile = { ...(profile || {}), bodyweight: bw };
+      await saveProfile();
+      showToast("Body weight saved");
+      render();
+    });
+
+    document.getElementById("wt-copy-btn").addEventListener("click", async () => {
+      const box = document.getElementById("wt-export-box");
+      try {
+        await navigator.clipboard.writeText(box.value);
+        showToast("Copied");
+      } catch (e) {
+        box.select();
+        showToast("Select the text above and copy manually");
+      }
+    });
+
+    document.getElementById("wt-import-btn").addEventListener("click", async () => {
+      const raw = document.getElementById("wt-import-box").value.trim();
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed.library) || !Array.isArray(parsed.sessions)) {
+          throw new Error("Missing library or sessions array");
+        }
+        library = parsed.library;
+        sessions = parsed.sessions;
+        templates = Array.isArray(parsed.templates) ? parsed.templates : templates;
+        await saveLibrary();
+        await saveSessions();
+        await saveTemplates();
+        showToast("Data restored");
+        render();
+      } catch (e) {
+        showToast("That didn't look like a valid backup");
+      }
+    });
+
+    document.getElementById("wt-reset-btn").addEventListener("click", async () => {
+      if (!confirm("This deletes all exercises, history, templates, and any in-progress workout. This can't be undone. Continue?")) return;
+      library = [];
+      sessions = [];
+      templates = [];
+      active = null;
+      await saveLibrary();
+      await saveSessions();
+      await saveTemplates();
+      await saveActive();
+      showToast("Everything reset");
+      currentView = "exercises";
+      render();
+    });
+  }
+
+  // ---------- ONBOARDING ----------
+  function maybeShowOnboarding() {
+    if (profile) return;
+    const root = document.getElementById("wt-modal-root");
+    root.innerHTML = `
+      <div class="wt-modal-backdrop" id="wt-onboard-backdrop">
+        <div class="wt-modal">
+          <h2>Welcome</h2>
+          <div class="wt-settings-sub" style="margin-bottom:14px;">
+            This tracker is yours alone — your data stays separate from anyone else who opens it.
+            What should we call you?
+          </div>
+          <div class="wt-form">
+            <input type="text" id="wt-onboard-name" placeholder="Your name">
+          </div>
+          <div class="wt-modal-actions">
+            <button class="wt-btn wt-btn-primary wt-btn-block" id="wt-onboard-save">Get Started</button>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById("wt-onboard-save").addEventListener("click", async () => {
+      const name = document.getElementById("wt-onboard-name").value.trim();
+      profile = { name: name || "" };
+      await saveProfile();
+      document.getElementById("wt-modal-root").innerHTML = "";
+      render();
+    });
+  }
+
+  function escapeHtml(str) {
+    const d = document.createElement("div");
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  // ---------- init ----------
+  (async function init() {
+    $view.innerHTML = `<div class="wt-empty">Loading…</div>`;
+    await loadAll();
+    render();
+    maybeShowOnboarding();
+    if (active) startElapsedTimer();
+  })();
+})();
+</script>
