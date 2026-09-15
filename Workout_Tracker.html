@@ -506,19 +506,60 @@
 
 <div id="wt-modal-root"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function () {
-  // Standalone-hosting shim: window.storage only exists inside the Claude artifact runtime.
-  // Outside it (e.g. GitHub Pages), fall back to localStorage behind the same async interface
-  // so nothing else in this file needs to know or care which environment it's running in.
-  if (!window.storage) {
+  // Standalone-hosting storage: window.storage only exists inside the Claude artifact runtime.
+  // Outside it (e.g. GitHub Pages), fall back through: Supabase (if configured + signed in,
+  // for real cross-device sync) -> localStorage (single-device, always available as a floor).
+  // Everything else in this file just calls window.storage and never knows which tier is live.
+  const IS_NATIVE = !!window.storage;
+  let sbClient = null;
+  let sbUser = null;
+
+  function getSbConfig() {
+    try { return JSON.parse(localStorage.getItem("wt-sb-config") || "null"); }
+    catch (e) { return null; }
+  }
+  function setSbConfig(cfg) { localStorage.setItem("wt-sb-config", JSON.stringify(cfg)); }
+  function clearSbConfig() { localStorage.removeItem("wt-sb-config"); }
+
+  async function initStorage() {
+    if (IS_NATIVE) return;
+    const cfg = getSbConfig();
+    if (cfg && cfg.url && cfg.anonKey && window.supabase) {
+      try {
+        sbClient = window.supabase.createClient(cfg.url, cfg.anonKey);
+        const { data } = await sbClient.auth.getSession();
+        sbUser = data && data.session ? data.session.user : null;
+      } catch (e) { sbClient = null; sbUser = null; }
+    }
     window.storage = {
       get: async (key) => {
+        if (sbClient && sbUser) {
+          const { data, error } = await sbClient.from("kv_store").select("value").eq("key", key).maybeSingle();
+          if (error) throw error;
+          return data ? { value: data.value } : null;
+        }
         const v = localStorage.getItem(key);
         return v === null ? null : { value: v };
       },
-      set: async (key, value) => { localStorage.setItem(key, value); },
-      delete: async (key) => { localStorage.removeItem(key); }
+      set: async (key, value) => {
+        if (sbClient && sbUser) {
+          const { error } = await sbClient.from("kv_store").upsert({ user_id: sbUser.id, key, value, updated_at: new Date().toISOString() });
+          if (error) throw error;
+          return;
+        }
+        localStorage.setItem(key, value);
+      },
+      delete: async (key) => {
+        if (sbClient && sbUser) {
+          const { error } = await sbClient.from("kv_store").delete().eq("key", key);
+          if (error) throw error;
+          return;
+        }
+        localStorage.removeItem(key);
+      }
     };
   }
 
@@ -1824,7 +1865,28 @@
     const fmtKB = (b) => (b / 1024).toFixed(1) + " KB";
     const pct = (b) => Math.max(0.1, (b / CAP * 100)).toFixed(2) + "%";
 
+    const sbCfg = getSbConfig();
+    const cloudSyncCard = IS_NATIVE ? "" : (sbClient && sbUser ? `
+      <div class="wt-settings-card">
+        <div class="wt-settings-title">Cloud Sync</div>
+        <div class="wt-settings-sub">Signed in as ${escapeHtml(sbUser.email)}. Data syncs to any device you sign into with this account.</div>
+        <div class="wt-settings-row">
+          <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-migrate-btn">Push Local Data to Cloud</button>
+          <button class="wt-btn wt-btn-ghost wt-btn-sm" id="wt-signout-btn">Sign Out</button>
+        </div>
+      </div>` : `
+      <div class="wt-settings-card">
+        <div class="wt-settings-title">Cloud Sync (Supabase)</div>
+        <div class="wt-settings-sub">Set up once to sync data across devices instead of it staying on just this browser. Needs a free Supabase project.</div>
+        <div class="wt-form">
+          <div><label>Project URL</label><input type="text" id="wt-sb-url" placeholder="https://xxxx.supabase.co" value="${sbCfg && sbCfg.url ? escapeHtml(sbCfg.url) : ""}"></div>
+          <div><label>Anon Public Key</label><input type="text" id="wt-sb-key" placeholder="eyJ..." value="${sbCfg && sbCfg.anonKey ? escapeHtml(sbCfg.anonKey) : ""}"></div>
+        </div>
+        <button class="wt-btn wt-btn-primary wt-btn-sm" id="wt-sb-enable-btn" style="margin-top:10px;">Enable Cloud Sync</button>
+      </div>`);
+
     $view.innerHTML = `
+      ${cloudSyncCard}
       <div class="wt-settings-card">
         <div class="wt-settings-title">Your name</div>
         <div class="wt-settings-sub">Shown at the top of the app.</div>
@@ -1893,6 +1955,29 @@
     `;
 
     document.getElementById("wt-plate-open-btn").addEventListener("click", () => openPlateCalcModal(0));
+
+    document.getElementById("wt-sb-enable-btn")?.addEventListener("click", () => {
+      const url = document.getElementById("wt-sb-url").value.trim();
+      const anonKey = document.getElementById("wt-sb-key").value.trim();
+      if (!url || !anonKey) { showToast("⚠ Enter both the Project URL and Anon Key"); return; }
+      setSbConfig({ url, anonKey });
+      location.reload();
+    });
+    document.getElementById("wt-migrate-btn")?.addEventListener("click", async () => {
+      const keys = ["exercise-library", "workout-sessions", "workout-templates", "profile"];
+      let migrated = 0;
+      for (const k of keys) {
+        const raw = localStorage.getItem(k);
+        if (raw !== null) { await window.storage.set(k, raw); migrated++; }
+      }
+      showToast(migrated ? `Migrated ${migrated} item(s) to the cloud` : "No local data found on this device to migrate");
+      setTimeout(() => location.reload(), 1200);
+    });
+    document.getElementById("wt-signout-btn")?.addEventListener("click", async () => {
+      if (sbClient) await sbClient.auth.signOut();
+      clearSbConfig();
+      location.reload();
+    });
 
     document.getElementById("wt-normalize-btn").addEventListener("click", async () => {
       if (!library.length) { showToast("No exercises in your library yet"); return; }
@@ -2009,8 +2094,46 @@
     return d.innerHTML;
   }
 
+  // ---------- CLOUD SYNC AUTH GATE (standalone hosting only) ----------
+  function renderAuthGate(errorMsg) {
+    document.getElementById("wt-root").innerHTML = `
+      <div class="wt-topbar"><h1>Sign In</h1><div class="wt-sub">Cloud Sync</div></div>
+      <div class="wt-main">
+        <div class="wt-settings-sub" style="margin-bottom:14px;">Sign in to sync your data across devices. First time here? Sign up below with any email/password.</div>
+        ${errorMsg ? `<div class="wt-error-box" style="margin-bottom:12px;">${escapeHtml(errorMsg)}</div>` : ""}
+        <div class="wt-form">
+          <div><label>Email</label><input type="email" id="wt-auth-email"></div>
+          <div><label>Password</label><input type="password" id="wt-auth-password"></div>
+        </div>
+        <div class="wt-modal-actions">
+          <button class="wt-btn wt-btn-ghost" id="wt-auth-signup" style="flex:1;">Sign Up</button>
+          <button class="wt-btn wt-btn-primary" id="wt-auth-signin" style="flex:1;">Sign In</button>
+        </div>
+        <button class="wt-btn wt-btn-ghost wt-btn-block" id="wt-auth-cancel" style="margin-top:20px;">Use offline mode on this device instead</button>
+      </div>`;
+    const emailInp = document.getElementById("wt-auth-email");
+    const passInp = document.getElementById("wt-auth-password");
+    document.getElementById("wt-auth-signin").addEventListener("click", async () => {
+      const { error } = await sbClient.auth.signInWithPassword({ email: emailInp.value.trim(), password: passInp.value });
+      if (error) { renderAuthGate(error.message); return; }
+      location.reload();
+    });
+    document.getElementById("wt-auth-signup").addEventListener("click", async () => {
+      const { error } = await sbClient.auth.signUp({ email: emailInp.value.trim(), password: passInp.value });
+      if (error) { renderAuthGate(error.message); return; }
+      showToast("Account created — check email to confirm if required, then sign in");
+      renderAuthGate();
+    });
+    document.getElementById("wt-auth-cancel").addEventListener("click", () => {
+      clearSbConfig();
+      location.reload();
+    });
+  }
+
   // ---------- init ----------
   (async function init() {
+    await initStorage();
+    if (sbClient && !sbUser) { renderAuthGate(); return; }
     $view.innerHTML = `<div class="wt-empty">Loading…</div>`;
     await loadAll();
     render();
