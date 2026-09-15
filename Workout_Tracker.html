@@ -622,7 +622,15 @@
     // Cool-down / stretch (cardio mode reused for hold time — Distance left at 0, see Settings note)
     { name: "Standing Hamstring Stretch", muscleGroup: "Legs", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 2, durationMin: 0.5, distanceMi: 0, restSets: 0, restNext: 15 },
     { name: "Child's Pose", muscleGroup: "Core", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 1, distanceMi: 0, restSets: 0, restNext: 0 },
-    { name: "Chest/Shoulder Doorway Stretch", muscleGroup: "Chest", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 1, distanceMi: 0, restSets: 0, restNext: 0 }
+    { name: "Chest/Shoulder Doorway Stretch", muscleGroup: "Chest", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 1, distanceMi: 0, restSets: 0, restNext: 0 },
+    // TV / general flexibility session — longer holds, not tied to a specific workout
+    { name: "Seated Forward Fold", muscleGroup: "Legs", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 1.5, distanceMi: 0, restSets: 0, restNext: 20 },
+    { name: "Figure-4 Glute Stretch", muscleGroup: "Legs", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 2, durationMin: 1, distanceMi: 0, restSets: 15, restNext: 20 },
+    { name: "Downward Dog", muscleGroup: "Shoulders", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 1, distanceMi: 0, restSets: 0, restNext: 20 },
+    { name: "Seated Spinal Twist", muscleGroup: "Core", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 2, durationMin: 1, distanceMi: 0, restSets: 15, restNext: 20 },
+    { name: "Neck Stretch", muscleGroup: "Shoulders", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 1, distanceMi: 0, restSets: 0, restNext: 15 },
+    { name: "Butterfly Stretch", muscleGroup: "Legs", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 1.5, distanceMi: 0, restSets: 0, restNext: 20 },
+    { name: "Foam Roll Quads", muscleGroup: "Legs", mode: "cardio", category: "cooldown", usesWeight: false, day: "", sets: 1, durationMin: 2, distanceMi: 0, restSets: 0, restNext: 20 }
   ];
 
   const RECOMMENDED_TEMPLATES = [
@@ -638,7 +646,8 @@
     { name: "Sunday", exerciseNames: ["Leg Press", "Leg Curl", "Calf Raise", "Walking Lunge", "Medicine Ball Russian Twist"] },
     { name: "Cool-down A", exerciseNames: ["Standing Hamstring Stretch", "Child's Pose"] },
     { name: "Cool-down B", exerciseNames: ["Chest/Shoulder Doorway Stretch", "Child's Pose"] },
-    { name: "Cool-down C (Full)", exerciseNames: ["Standing Hamstring Stretch", "Chest/Shoulder Doorway Stretch", "Child's Pose"] }
+    { name: "Cool-down C (Full)", exerciseNames: ["Standing Hamstring Stretch", "Chest/Shoulder Doorway Stretch", "Child's Pose"] },
+    { name: "TV Stretch Routine", exerciseNames: ["Cat-Cow Stretch", "Downward Dog", "Seated Forward Fold", "Butterfly Stretch", "Figure-4 Glute Stretch", "Seated Spinal Twist", "Foam Roll Quads", "Standing Hamstring Stretch", "Chest/Shoulder Doorway Stretch", "Neck Stretch", "Child's Pose"] }
   ];
 
   const EXERCISE_GUIDES = {
@@ -667,7 +676,14 @@
     "treadmill walk": ["Set a brisk but sustainable pace.", "Keep your posture upright — don't hold onto the rails.", "Swing your arms naturally.", "Adjust incline/speed rather than leaning on the machine for support."],
     "standing hamstring stretch": ["Extend one leg forward, heel down, toes up.", "Hinge at the hips, keeping your back straight.", "Stop when you feel a stretch in the back of the extended leg — don't force it.", "Hold, then switch sides."],
     "child's pose": ["Kneel with big toes touching, knees wide.", "Sit back onto your heels.", "Reach your arms forward, lowering your chest toward the floor.", "Breathe deeply and let your lower back relax."],
-    "chest/shoulder doorway stretch": ["Place your forearm on a doorframe, elbow at shoulder height.", "Step forward through the doorway until you feel a stretch.", "Keep your torso upright — don't overextend your lower back.", "Hold, then switch sides."]
+    "chest/shoulder doorway stretch": ["Place your forearm on a doorframe, elbow at shoulder height.", "Step forward through the doorway until you feel a stretch.", "Keep your torso upright — don't overextend your lower back.", "Hold, then switch sides."],
+    "seated forward fold": ["Sit with legs extended straight in front of you.", "Hinge at the hips and reach toward your toes, keeping your back as straight as possible.", "Stop where you feel a stretch — don't force it or round excessively.", "Relax into the hold, breathing slowly."],
+    "figure-4 glute stretch": ["Lie on your back, knees bent, feet flat.", "Cross one ankle over the opposite knee.", "Pull the uncrossed leg toward your chest until you feel a stretch in the crossed leg's glute.", "Hold, then switch sides."],
+    "downward dog": ["Start on hands and knees, then lift your hips up and back.", "Straighten your legs as much as comfortable, heels reaching toward the floor.", "Keep hands shoulder-width, pressing the floor away from you.", "Let your head relax between your arms."],
+    "seated spinal twist": ["Sit with legs extended, then bend one knee and cross it over the other leg.", "Place the opposite elbow outside the bent knee and gently rotate your torso toward it.", "Keep your spine tall rather than slouching into the twist.", "Hold, then switch sides."],
+    "neck stretch": ["Sit or stand tall, shoulders relaxed.", "Gently tilt your head toward one shoulder until you feel a stretch along the opposite side of your neck.", "Hold without pulling — let gravity do the work.", "Return to center, then switch sides."],
+    "butterfly stretch": ["Sit with the soles of your feet together, knees out to the sides.", "Hold your feet and gently let your knees drop toward the floor.", "Keep your back straight rather than hunching forward.", "Hold — don't bounce your knees."],
+    "foam roll quads": ["Lie face-down, roller positioned under your thighs.", "Support your weight on your forearms and slowly roll from hip to knee.", "Pause on any tender spots for a few seconds.", "Keep your core engaged so your lower back doesn't sag."]
   };
 
   function renderMuscleDiagram(muscleGroup) {
@@ -2233,13 +2249,13 @@
 
       <div class="wt-settings-card">
         <div class="wt-settings-title">Add Starter Set (Warm-up / Cool-down)</div>
-        <div class="wt-settings-sub">Adds 11 exercises in one tap: 4 warm-up moves (Treadmill Jog, Band Pull-Aparts, Bodyweight Squats, Cat-Cow), 4 main gap-fillers (Medicine Ball Twist/Slam, Cable Row, Treadmill Walk), 3 cool-down stretches (Hamstring Stretch, Child's Pose, Doorway Stretch). Skips any name you already have — safe to tap more than once.</div>
+        <div class="wt-settings-sub">Adds 18 exercises in one tap: 4 warm-up moves, 4 main gap-fillers, and 10 cool-down/flexibility stretches (including a longer set meant for a standalone TV stretch session — Downward Dog, Seated Forward Fold, Butterfly, Figure-4, Spinal Twist, Foam Roll Quads, Neck Stretch). Skips any name you already have — safe to tap more than once.</div>
         <button class="wt-btn wt-btn-primary wt-btn-sm" id="wt-seed-btn">Add Starter Set</button>
       </div>
 
       <div class="wt-settings-card">
         <div class="wt-settings-title">Create Starter Templates</div>
-        <div class="wt-settings-sub">Builds 13 templates in one tap: Warm-up A/B/C, Push/Pull/Legs A/B, Cardio + Core, and Cool-down A/B/C (Full). Matches exercises by name from your library — add the Starter Set above first, or it'll skip whatever it can't find and tell you what's missing.</div>
+        <div class="wt-settings-sub">Builds 14 templates in one tap: Warm-up A/B/C, Push/Pull/Legs A/B, Cardio + Core, Cool-down A/B/C (Full), and a separate "TV Stretch Routine" (11 stretches, longer holds, meant to stand alone — not tied to a workout). Matches exercises by name from your library — add the Starter Set above first, or it'll skip whatever it can't find and tell you what's missing.</div>
         <button class="wt-btn wt-btn-primary wt-btn-sm" id="wt-seed-templates-btn">Create Starter Templates</button>
       </div>
 
