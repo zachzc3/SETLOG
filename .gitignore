@@ -1,3 +1,6 @@
 # Personal data files not meant for a public repo
 STATS_Retired.xlsx
 Recomp_Tracker.xlsx
+garmin_export/
+garmin_export_raw/
+~$*
